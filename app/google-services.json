@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "371527547546",
+    "project_id": "street-pieces",
+    "storage_bucket": "street-pieces.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:371527547546:android:af8a67d4efbb045d2ebd23",
+        "android_client_info": {
+          "package_name": "com.asisee.streetpieces"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "371527547546-peom1ah9bm77ojsg3jp4n6e8833f35sl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABm6qCsm59fSECZUw6apoDdYRcTCwscHs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "371527547546-peom1ah9bm77ojsg3jp4n6e8833f35sl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
