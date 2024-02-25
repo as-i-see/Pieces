@@ -5,12 +5,11 @@ import com.asisee.streetpieces.model.service.AccountService
 import com.asisee.streetpieces.model.service.trace
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.UserProfileChangeRequest
-import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
 class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : AccountService {
 
@@ -27,7 +26,7 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
         get() = callbackFlow {
             val listener =
                 FirebaseAuth.AuthStateListener { auth ->
-                    this.trySend(auth.currentUser?.let { User(it.uid, it.isAnonymous) }?: User())
+                    this.trySend(auth.currentUser?.let { User(it.uid, it.isAnonymous) } ?: User())
                 }
             auth.addAuthStateListener(listener)
             awaitClose { auth.removeAuthStateListener(listener) }
@@ -63,12 +62,10 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
         auth.signOut()
 
         // Sign the user back in anonymously.
-//    createAnonymousAccount()
+        //    createAnonymousAccount()
     }
 
     companion object {
         private const val LINK_ACCOUNT_TRACE = "linkAccount"
     }
-
-
 }

@@ -16,9 +16,6 @@ limitations under the License.
 
 package com.asisee.streetpieces.screens.settings
 
-import com.asisee.streetpieces.LOGIN_SCREEN
-import com.asisee.streetpieces.SIGN_UP_SCREEN
-import com.asisee.streetpieces.SPLASH_SCREEN
 import com.asisee.streetpieces.model.service.AccountService
 import com.asisee.streetpieces.model.service.LogService
 import com.asisee.streetpieces.screens.LogViewModel
@@ -27,29 +24,25 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
+class SettingsViewModel
+@Inject
+constructor(
     logService: LogService,
     private val accountService: AccountService,
 ) : LogViewModel(logService) {
-  val uiState = accountService.currentUserFlow.map {
-    SettingsUiState(it.isAnonymous)
-  }
+    val uiState = accountService.currentUserFlow.map { SettingsUiState(it.isAnonymous) }
 
-  fun onLoginClick(openScreen: (String) -> Unit) = openScreen(LOGIN_SCREEN)
-
-  fun onSignUpClick(openScreen: (String) -> Unit) = openScreen(SIGN_UP_SCREEN)
-
-  fun onSignOutClick(restartApp: (String) -> Unit) {
-    launchCatching {
-      accountService.signOut()
-      restartApp(SPLASH_SCREEN)
+    fun onSignOutClick(restartApp: () -> Unit) {
+        launchCatching {
+            accountService.signOut()
+            restartApp()
+        }
     }
-  }
 
-  fun onDeleteMyAccountClick(restartApp: (String) -> Unit) {
-    launchCatching {
-      accountService.deleteAccount()
-      restartApp(SPLASH_SCREEN)
+    fun onDeleteMyAccountClick(restartApp: () -> Unit) {
+        launchCatching {
+            accountService.deleteAccount()
+            restartApp()
+        }
     }
-  }
 }

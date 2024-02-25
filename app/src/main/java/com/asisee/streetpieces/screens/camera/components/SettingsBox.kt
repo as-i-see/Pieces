@@ -1,6 +1,10 @@
 package com.asisee.streetpieces.screens.camera.components
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -32,8 +36,7 @@ fun SettingsBox(
             modifier = Modifier.align(Alignment.TopStart),
             hasFlashUnit = hasFlashUnit,
             flashMode = flashMode,
-            onFlashModeChanged = onFlashModeChanged
-        )
+            onFlashModeChanged = onFlashModeChanged)
         Column(
             modifier = Modifier.align(Alignment.TopCenter),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -42,15 +45,14 @@ fun SettingsBox(
                 modifier = Modifier.padding(top = 16.dp),
                 enter = fadeIn() + slideInVertically(),
                 exit = fadeOut() + slideOutVertically(),
-                visible = zoomHasChanged
-            ) {
-                Text(
-                    text = "${zoomRatio.roundTo(1)}X",
-                    fontSize = 24.sp,
-                    textAlign = TextAlign.Center,
-                    color = Color.White,
-                )
-            }
+                visible = zoomHasChanged) {
+                    Text(
+                        text = "${zoomRatio.roundTo(1)}X",
+                        fontSize = 24.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                    )
+                }
         }
     }
     LaunchedEffect(zoomRatio, zoomHasChanged) {

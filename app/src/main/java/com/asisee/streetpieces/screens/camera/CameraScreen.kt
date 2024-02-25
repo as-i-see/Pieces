@@ -22,6 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asisee.streetpieces.common.ext.noClickable
+import com.asisee.streetpieces.screens.camera.components.ActionBox
+import com.asisee.streetpieces.screens.camera.components.SettingsBox
+import com.asisee.streetpieces.screens.camera.mapper.toFlash
+import com.asisee.streetpieces.screens.camera.mapper.toFlashMode
+import com.asisee.streetpieces.screens.camera.model.Flash
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.skydoves.cloudy.Cloudy
 import com.ujizin.camposer.CameraPreview
 import com.ujizin.camposer.state.CamSelector
@@ -30,24 +37,20 @@ import com.ujizin.camposer.state.rememberCamSelector
 import com.ujizin.camposer.state.rememberCameraState
 import com.ujizin.camposer.state.rememberFlashMode
 import com.ujizin.camposer.state.rememberTorch
-import com.asisee.streetpieces.screens.camera.components.ActionBox
-import com.asisee.streetpieces.screens.camera.components.SettingsBox
-import com.asisee.streetpieces.screens.camera.mapper.toFlash
-import com.asisee.streetpieces.screens.camera.mapper.toFlashMode
-import com.asisee.streetpieces.screens.camera.model.Flash
 
+@Destination
 @Composable
 fun CameraScreen(
-    openScreen: (String) -> Unit,
+    navigator: DestinationsNavigator,
     viewModel: CameraViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cameraState = rememberCameraState()
     CameraSection(
         cameraState = cameraState,
-        onTakePicture = { viewModel.takePicture(openScreen, cameraState) },
+        onTakePicture = { viewModel.takePicture(navigator::navigate, cameraState) },
         onGalleryClick = { viewModel.onGalleryClick() },
-        )
+    )
 
     val context = LocalContext.current
     LaunchedEffect(uiState.error) {
@@ -84,27 +87,25 @@ fun CameraSection(
         },
         onSwitchToBack = { bitmap ->
             Cloudy(radius = 20) { Image(bitmap.asImageBitmap(), contentDescription = null) }
+        }) {
+            CameraInnerContent(
+                Modifier.fillMaxSize(),
+                zoomHasChanged = zoomHasChanged,
+                zoomRatio = zoomRatio,
+                flashMode = flashMode.toFlash(enableTorch),
+                hasFlashUnit = hasFlashUnit,
+                onGalleryClick = onGalleryClick,
+                onFlashModeChanged = { flash ->
+                    enableTorch = flash == Flash.Always
+                    flashMode = flash.toFlashMode()
+                },
+                onZoomFinish = { zoomHasChanged = false },
+                onTakePicture = onTakePicture) {
+                    if (cameraState.isStreaming) {
+                        camSelector = camSelector.inverse
+                    }
+                }
         }
-    ) {
-        CameraInnerContent(
-            Modifier.fillMaxSize(),
-            zoomHasChanged = zoomHasChanged,
-            zoomRatio = zoomRatio,
-            flashMode = flashMode.toFlash(enableTorch),
-            hasFlashUnit = hasFlashUnit,
-            onGalleryClick = onGalleryClick,
-            onFlashModeChanged = { flash ->
-                enableTorch = flash == Flash.Always
-                flashMode = flash.toFlashMode()
-            },
-            onZoomFinish = { zoomHasChanged = false },
-            onTakePicture = onTakePicture
-        ) {
-            if (cameraState.isStreaming) {
-                camSelector = camSelector.inverse
-            }
-        }
-    }
 }
 
 @Composable
@@ -125,9 +126,9 @@ fun CameraInnerContent(
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         SettingsBox(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 8.dp, start = 24.dp, end = 24.dp),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 8.dp, start = 24.dp, end = 24.dp),
             zoomRatio = zoomRatio,
             zoomHasChanged = zoomHasChanged,
             flashMode = flashMode,
@@ -136,10 +137,7 @@ fun CameraInnerContent(
             onZoomFinish = onZoomFinish,
         )
         ActionBox(
-            modifier = Modifier
-                .fillMaxWidth()
-                .noClickable()
-                .padding(bottom = 32.dp, top = 16.dp),
+            modifier = Modifier.fillMaxWidth().noClickable().padding(bottom = 32.dp, top = 16.dp),
             onGalleryClick = onGalleryClick,
             onTakePicture = onTakePicture,
             onSwitchCamera = onSwitchCamera,

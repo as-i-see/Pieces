@@ -18,12 +18,9 @@ fun ActionBox(
         modifier = modifier,
     ) {
         PictureActions(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp, bottom = 32.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 32.dp),
             onGalleryClick = onGalleryClick,
             onTakePicture = onTakePicture,
-            onSwitchCamera = onSwitchCamera
-        )
+            onSwitchCamera = onSwitchCamera)
     }
 }

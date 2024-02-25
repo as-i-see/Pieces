@@ -36,89 +36,96 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.asisee.streetpieces.R.string as AppText
 import com.asisee.streetpieces.common.composable.ActionToolbar
 import com.asisee.streetpieces.common.composable.BasicField
 import com.asisee.streetpieces.common.ext.alertDialog
-import com.asisee.streetpieces.common.ext.spacerXXL
 import com.asisee.streetpieces.common.ext.permissionButton
 import com.asisee.streetpieces.common.ext.row
 import com.asisee.streetpieces.common.ext.spacerM
+import com.asisee.streetpieces.common.ext.spacerXXL
+import com.asisee.streetpieces.screens.destinations.SearchFeedScreenDestination
 import com.asisee.streetpieces.theme.BrightOrange
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.asisee.streetpieces.R.drawable as AppIcon
+import com.asisee.streetpieces.R.string as AppText
 
+@Destination(navArgsDelegate = CreatePieceScreenNavArgs::class)
 @Composable
 fun CreatePieceScreen(
-    openAndPopUp: (String, String) -> Unit,
-    modifier: Modifier = Modifier,
+    navigator: DestinationsNavigator,
     viewModel: CreatePieceViewModel = hiltViewModel()
 ) {
     val piece by viewModel.piece
     var showWarningDialog by remember { mutableStateOf(false) }
-    Column(modifier = modifier
-        .fillMaxWidth()
-        .fillMaxHeight()
-        .verticalScroll(rememberScrollState())
-    ) {
-        if (showWarningDialog) {
-            AlertDialog(
-                modifier = Modifier.alertDialog(),
-                title = { Text(stringResource(id = AppText.missing_details_title)) },
-                text = { Text(stringResource(id = AppText.missing_details_text)) },
-                confirmButton = {
-                    TextButton(
-                        onClick = { showWarningDialog = false },
-                        modifier = Modifier.permissionButton(),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = BrightOrange,
-                            contentColor = Color.White
-                        )
-                    ) { Text(text = stringResource(AppText.ok)) }
-                },
-                onDismissRequest = { showWarningDialog = false }
-            )
-        }
-
-        ActionToolbar(title = AppText.edit_piece, endActionIcon = AppIcon.ic_check, modifier = Modifier) {
-            if (piece.title.isBlank() || piece.location.isNotSet()) {
-                showWarningDialog = true
-            } else viewModel.onDoneClick(openAndPopUp)
-        }
-
-        Spacer(modifier = Modifier.spacerM())
-
-        Row(Modifier.row(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceAround) {
-            BasicField(AppText.title, piece.title, { viewModel.onTitleChange(it) }, modifier.fillMaxWidth(0.7f))
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(piece.photoUri)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = stringResource(AppText.preview),
-                placeholder = painterResource(id = AppIcon.photo_placeholder),
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .clip(RectangleShape)
-                    .width(100.dp)
-                    .height(100.dp),
-                )
-
-        }
-
-        Spacer(modifier = Modifier.spacerXXL())
-
-        if (piece.location.isNotSet())
-            Text(text = stringResource(AppText.missing_location_title), fontSize = 18.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxSize())
-        else {
-            LaunchedEffect(true) {
-                viewModel.onLocationFetched()
+    Column(
+        modifier = Modifier.fillMaxWidth().fillMaxHeight().verticalScroll(rememberScrollState())) {
+            if (showWarningDialog) {
+                AlertDialog(
+                    modifier = Modifier.alertDialog(),
+                    title = { Text(stringResource(id = AppText.missing_details_title)) },
+                    text = { Text(stringResource(id = AppText.missing_details_text)) },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { showWarningDialog = false },
+                            modifier = Modifier.permissionButton(),
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    backgroundColor = BrightOrange, contentColor = Color.White)) {
+                                Text(text = stringResource(AppText.ok))
+                            }
+                    },
+                    onDismissRequest = { showWarningDialog = false })
             }
-            Text(text = piece.location.text(), fontSize = 18.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxSize())
-        }
 
-        LaunchedEffect(viewModel.locationFetchTick) {
-            viewModel.updateLocation()
-        }
+            ActionToolbar(
+                title = AppText.edit_piece, endActionIcon = AppIcon.ic_check, modifier = Modifier) {
+                    if (piece.title.isBlank() || piece.location.isNotSet()) {
+                        showWarningDialog = true
+                    } else viewModel.onDoneClick { navigator.navigate(SearchFeedScreenDestination) }
+                }
 
-    }
+            Spacer(modifier = Modifier.spacerM())
+
+            Row(
+                Modifier.row(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceAround) {
+                    BasicField(
+                        AppText.title,
+                        piece.title,
+                        { viewModel.onTitleChange(it) },
+                        Modifier.fillMaxWidth(0.7f))
+                    AsyncImage(
+                        model =
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(piece.photoUri)
+                                .crossfade(true)
+                                .build(),
+                        contentDescription = stringResource(AppText.preview),
+                        placeholder = painterResource(id = AppIcon.photo_placeholder),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.clip(RectangleShape).width(100.dp).height(100.dp),
+                    )
+                }
+
+            Spacer(modifier = Modifier.spacerXXL())
+
+            if (piece.location.isNotSet())
+                Text(
+                    text = stringResource(AppText.missing_location_title),
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxSize())
+            else {
+                LaunchedEffect(true) { viewModel.onLocationFetched() }
+                Text(
+                    text = piece.location.text(),
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxSize())
+            }
+
+            LaunchedEffect(viewModel.locationFetchTick) { viewModel.updateLocation() }
+        }
 }

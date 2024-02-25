@@ -115,4 +115,8 @@ dependencies {
     // DateTime
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
 
+    // Compose Destinations
+    implementation("io.github.raamcosta.compose-destinations:animations-core:1.9.62")
+    ksp("io.github.raamcosta.compose-destinations:ksp:1.9.62")
+
 }

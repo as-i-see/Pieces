@@ -11,22 +11,20 @@ import kotlin.coroutines.suspendCoroutine
 class PhotoStorageServiceImpl @Inject constructor(storage: FirebaseStorage) : PhotoStorageService {
     private val storageRef = storage.reference
 
-    private suspend fun uploadImageToFolder(uri: Uri, folder: String) = suspendCoroutine { continuation ->
-        val pieceRef = storageRef.child("$folder/${UUID.randomUUID()}")
-        val uploadTask = pieceRef.putFile(uri)
-        uploadTask.continueWithTask { task ->
-            if (!task.isSuccessful) {
-                task.exception?.let {
-                    throw it
+    private suspend fun uploadImageToFolder(uri: Uri, folder: String) =
+        suspendCoroutine { continuation ->
+            val pieceRef = storageRef.child("$folder/${UUID.randomUUID()}")
+            val uploadTask = pieceRef.putFile(uri)
+            uploadTask
+                .continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        task.exception?.let { throw it }
+                    }
+                    pieceRef.downloadUrl
                 }
-            }
-            pieceRef.downloadUrl
-        }.addOnFailureListener {
-            throw it
-        }.addOnSuccessListener {
-            continuation.resume(it.toString())
+                .addOnFailureListener { throw it }
+                .addOnSuccessListener { continuation.resume(it.toString()) }
         }
-    }
 
     override suspend fun uploadPiecePhoto(uri: Uri) = uploadImageToFolder(uri, PIECES_FOLDER)
 

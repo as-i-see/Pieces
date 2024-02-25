@@ -1,56 +1,43 @@
 package com.asisee.streetpieces
 
-import androidx.compose.foundation.Image
 import androidx.compose.material.BottomNavigation
-import androidx.compose.material.Icon
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.asisee.streetpieces.model.service.AccountService
+import androidx.navigation.NavController
+import com.asisee.streetpieces.screens.NavGraphs
+import com.asisee.streetpieces.screens.appCurrentDestinationAsState
+import com.asisee.streetpieces.screens.destinations.Destination
+import com.asisee.streetpieces.screens.startAppDestination
+import com.ramcosta.composedestinations.navigation.navigate
 
 @Composable
-fun BottomBar(navController: NavHostController, modifier: Modifier = Modifier) {
-    val destinations = listOf(
-        BottomBarDestination.SearchFeed, BottomBarDestination.Profile
-    )
-    NavigationBar(tonalElevation = 4.dp) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
+fun BottomBar(navController: NavController) {
+    val currentDestination: Destination = navController.currentDestination()
 
-        destinations.forEach { screen ->
-            NavigationBarItem(
-                label = {
-                    Text(text = stringResource(id = screen.title))
+    BottomNavigation {
+        BottomBarDestination.entries.forEach { destination ->
+            BottomNavigationItem(
+                selected = currentDestination == destination.direction,
+                onClick = {
+                    navController.navigate(destination.direction) { launchSingleTop = true }
                 },
                 icon = {
-                    Image(painter = painterResource(id = screen.icon), contentDescription = stringResource(id = screen.title))
+                    Icon(
+                        painterResource(id = destination.icon),
+                        contentDescription = stringResource(destination.label))
                 },
-                selected = currentRoute == screen.route || currentRoute?.endsWith(OWN_USER_ID) == true,
-                onClick = {
-                    navController.navigate(screen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-//                        launchSingleTop = true
-                        restoreState = true
-
-                    }
-                }
+                label = { Text(stringResource(destination.label)) },
             )
         }
     }
 }
 
-fun String.withoutParams() = substringBefore('?')
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun NavController.currentDestination() =
+    appCurrentDestinationAsState().value ?: NavGraphs.root.startAppDestination

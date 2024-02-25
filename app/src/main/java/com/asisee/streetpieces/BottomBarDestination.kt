@@ -2,26 +2,17 @@ package com.asisee.streetpieces
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.asisee.streetpieces.R.string as AppText
+import com.asisee.streetpieces.screens.destinations.OwnProfileScreenDestination
+import com.asisee.streetpieces.screens.destinations.SearchFeedScreenDestination
+import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 import com.asisee.streetpieces.R.drawable as AppIcon
+import com.asisee.streetpieces.R.string as AppText
 
-sealed class BottomBarDestination(
-    val route: String,
-    @StringRes val title: Int,
+enum class BottomBarDestination(
+    val direction: DirectionDestinationSpec,
     @DrawableRes val icon: Int,
-    @DrawableRes val icon_focused: Int
+    @StringRes val label: Int
 ) {
-    data object SearchFeed : BottomBarDestination(
-        route = SEARCH_FEED_SCREEN,
-        title = AppText.search,
-        icon = AppIcon.ic_search,
-        icon_focused = AppIcon.ic_search
-    )
-    data object Profile : BottomBarDestination(
-        route = "$PROFILE_SCREEN?$USER_ID={${OWN_USER_ID}}",
-        title = AppText.profile,
-        icon = AppIcon.ic_avatar,
-        icon_focused = AppIcon.ic_avatar
-    )
-
+    SearchFeed(SearchFeedScreenDestination, AppIcon.ic_search, AppText.search),
+    Profile(OwnProfileScreenDestination, AppIcon.ic_avatar, AppText.profile)
 }

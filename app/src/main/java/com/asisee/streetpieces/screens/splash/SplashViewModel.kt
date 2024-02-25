@@ -2,10 +2,6 @@ package com.asisee.streetpieces.screens.splash
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.asisee.streetpieces.LOGIN_SCREEN
-import com.asisee.streetpieces.SEARCH_FEED_SCREEN
-import com.asisee.streetpieces.SIGN_UP_SCREEN
-import com.asisee.streetpieces.SPLASH_SCREEN
 import com.asisee.streetpieces.model.service.AccountService
 import com.asisee.streetpieces.model.service.ConfigurationService
 import com.asisee.streetpieces.model.service.LogService
@@ -16,43 +12,43 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SplashViewModel @Inject constructor(
+class SplashViewModel
+@Inject
+constructor(
     configurationService: ConfigurationService,
     private val accountService: AccountService,
     logService: LogService
 ) : LogViewModel(logService) {
-  val uiState = mutableStateOf(SplashUiState(showError = false, showProgress = true))
-  private val userFlow = accountService.currentUserFlow
-  init {
-    launchCatching { configurationService.fetchConfiguration() }
-  }
+    val uiState = mutableStateOf(SplashUiState(showError = false, showProgress = true))
+    private val userFlow = accountService.currentUserFlow
 
-  fun onAppStart(openAndPopUp: (String, String) -> Unit) = viewModelScope.launch {
-    uiState.value = uiState.value.copy(showError = false)
-    if (accountService.hasUser && !accountService.currentUser!!.isAnonymous) {
-      openAndPopUp(SEARCH_FEED_SCREEN, SPLASH_SCREEN)
+    init {
+        launchCatching { configurationService.fetchConfiguration() }
     }
-    uiState.value = uiState.value.copy(showProgress = false)
-  }
 
-  fun toLoginScreen(open: (String) -> Unit) = open(LOGIN_SCREEN)
+    fun onAppStart(toMainScreen: () -> Unit) =
+        viewModelScope.launch {
+            uiState.value = uiState.value.copy(showError = false)
+            if (accountService.hasUser && !accountService.currentUser!!.isAnonymous) {
+                toMainScreen()
+            }
+            uiState.value = uiState.value.copy(showProgress = false)
+        }
 
-  fun toSignUpScreen(open: (String) -> Unit) = open(SIGN_UP_SCREEN)
+    fun toMainScreen(toMainScreen: () -> Unit) =
+        viewModelScope.launch {
+            if (!accountService.hasUser) createAnonymousAccount()
+            toMainScreen()
+        }
 
-  fun toMainScreen(openAndPopUp: (String, String) -> Unit) = viewModelScope.launch {
-    if (!accountService.hasUser)
-      createAnonymousAccount()
-    openAndPopUp(SEARCH_FEED_SCREEN, SPLASH_SCREEN)
-  }
-
-  private fun createAnonymousAccount() {
-    launchCatching(snackbar = false) {
-      try {
-        accountService.createAnonymousAccount()
-      } catch (ex: FirebaseAuthException) {
-        uiState.value = uiState.value.copy(showError = true)
-        throw ex
-      }
+    private fun createAnonymousAccount() {
+        launchCatching(snackbar = false) {
+            try {
+                accountService.createAnonymousAccount()
+            } catch (ex: FirebaseAuthException) {
+                uiState.value = uiState.value.copy(showError = true)
+                throw ex
+            }
+        }
     }
-  }
 }

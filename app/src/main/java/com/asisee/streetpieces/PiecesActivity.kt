@@ -12,11 +12,12 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 @ExperimentalMaterialApi
 class PiecesActivity : AppCompatActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContent { PiecesApp() }
-    val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-    windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-    windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
-  }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent { PiecesApp() }
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
+    }
 }

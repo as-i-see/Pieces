@@ -30,17 +30,16 @@ fun Button(
     val scale by animateFloatAsState(if (pressed) 0.9F else 1F)
 
     Box(
-        modifier = Modifier
-            .scale(scale)
-            .then(modifier)
-            .clickable(
-                enabled = enabled,
-                indication = rememberRipple(bounded = true),
-                interactionSource = interactionSource,
-                onClick = onClick,
-            )
-            .padding(contentPaddingValues),
+        modifier =
+            Modifier.scale(scale)
+                .then(modifier)
+                .clickable(
+                    enabled = enabled,
+                    indication = rememberRipple(bounded = true),
+                    interactionSource = interactionSource,
+                    onClick = onClick,
+                )
+                .padding(contentPaddingValues),
         contentAlignment = Alignment.Center,
-        content = content
-    )
+        content = content)
 }

@@ -32,45 +32,52 @@ import com.asisee.streetpieces.model.UserData
 
 @Composable
 fun PieceView(piece: Piece, userData: UserData, toProfile: (String) -> Unit) {
-    Column(modifier = Modifier
-        .fillMaxWidth()) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp).clickable { toProfile(userData.userId) }, verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(userData.photoUri)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = stringResource(R.string.uploaded_avatar),
-                placeholder = painterResource(id = R.drawable.ic_sign_in),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .width(30.dp)
-                    .aspectRatio(1f)
-                    .clip(CircleShape),
-            )
-            Text(modifier = Modifier.padding(start = 8.dp), text = userData.username, fontWeight = FontWeight.SemiBold)
-        }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier =
+                Modifier.fillMaxWidth().padding(start = 16.dp).clickable {
+                    toProfile(userData.userId)
+                },
+            verticalAlignment = Alignment.CenterVertically) {
+                AsyncImage(
+                    model =
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(userData.photoUri)
+                            .crossfade(true)
+                            .build(),
+                    contentDescription = stringResource(R.string.uploaded_avatar),
+                    placeholder = painterResource(id = R.drawable.ic_sign_in),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.width(30.dp).aspectRatio(1f).clip(CircleShape),
+                )
+                Text(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = userData.username,
+                    fontWeight = FontWeight.SemiBold)
+            }
         Spacer(modifier = Modifier.spacerS())
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(piece.photoUri)
-                .crossfade(true)
-                .build(),
+            model =
+                ImageRequest.Builder(LocalContext.current)
+                    .data(piece.photoUri)
+                    .crossfade(true)
+                    .build(),
             contentDescription = stringResource(R.string.piece),
             placeholder = painterResource(id = R.drawable.ic_sign_in),
             contentScale = ContentScale.FillWidth,
-            modifier = Modifier.fillMaxWidth()
-        )
+            modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.spacerS())
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(text = userData.username, fontWeight = FontWeight.SemiBold)
-            Text(modifier = Modifier.padding(start = 8.dp), text = piece.title)
-        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+                Text(text = userData.username, fontWeight = FontWeight.SemiBold)
+                Text(modifier = Modifier.padding(start = 8.dp), text = piece.title)
+            }
         Spacer(modifier = Modifier.spacerXS())
-        Text(modifier = Modifier.padding(start = 16.dp), fontWeight = FontWeight.Light, fontSize = 10.sp, text = epochSecondsToPieceDate(piece.dateTimeInEpochSeconds))
+        Text(
+            modifier = Modifier.padding(start = 16.dp),
+            fontWeight = FontWeight.Light,
+            fontSize = 10.sp,
+            text = epochSecondsToPieceDate(piece.dateTimeInEpochSeconds))
     }
 }

@@ -18,31 +18,28 @@ import kotlin.random.Random
 class PiecesMessagingService : FirebaseMessagingService() {
 
     private val random = Random
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        remoteMessage.notification?.let { message ->
-            sendNotification(message)
-        }
+        remoteMessage.notification?.let { message -> sendNotification(message) }
     }
 
     @OptIn(ExperimentalMaterialApi::class)
     private fun sendNotification(message: RemoteMessage.Notification) {
 
-        val intent = Intent(this, PiecesActivity::class.java).apply {
-            addFlags(FLAG_ACTIVITY_CLEAR_TOP)
-        }
+        val intent =
+            Intent(this, PiecesActivity::class.java).apply { addFlags(FLAG_ACTIVITY_CLEAR_TOP) }
 
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent, FLAG_IMMUTABLE
-        )
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, FLAG_IMMUTABLE)
 
         val channelId = this.getString(R.string.default_notification_channel_id)
 
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setContentTitle(message.title)
-            .setContentText(message.body)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
+        val notificationBuilder =
+            NotificationCompat.Builder(this, channelId)
+                .setContentTitle(message.title)
+                .setContentText(message.body)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
 
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
@@ -58,7 +55,7 @@ class PiecesMessagingService : FirebaseMessagingService() {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // FCM registration token to your app server.
-        Log.d("FCM","New token: $token")
+        Log.d("FCM", "New token: $token")
     }
 
     companion object {

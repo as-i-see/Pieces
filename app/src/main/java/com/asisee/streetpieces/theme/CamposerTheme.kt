@@ -6,11 +6,11 @@ import androidx.compose.runtime.Composable
 @Composable
 fun CamposerTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colors = MaterialTheme.colors.copy(
-            primary = BrightOrange,
-            background = DarkOrange,
-        ),
+        colors =
+            MaterialTheme.colors.copy(
+                primary = BrightOrange,
+                background = DarkOrange,
+            ),
         typography = Typography,
-        content = content
-    )
+        content = content)
 }

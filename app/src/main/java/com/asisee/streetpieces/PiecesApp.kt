@@ -5,7 +5,14 @@ import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.Surface
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
@@ -14,37 +21,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.asisee.streetpieces.R.string as AppText
 import com.asisee.streetpieces.common.composable.PermissionDialog
 import com.asisee.streetpieces.common.composable.RationaleDialog
 import com.asisee.streetpieces.common.snackbar.SnackbarManager
-import com.asisee.streetpieces.screens.camera.CameraScreen
-import com.asisee.streetpieces.screens.create_piece.CreatePieceScreen
-import com.asisee.streetpieces.screens.login.LoginScreen
-import com.asisee.streetpieces.screens.permission.RequestCameraPermissionDialog
-import com.asisee.streetpieces.screens.permission.RequestLocationPermissionDialog
-import com.asisee.streetpieces.screens.piece.PieceScreen
-import com.asisee.streetpieces.screens.profile.ProfileScreen
-import com.asisee.streetpieces.screens.searchfeed.SearchFeedScreen
-import com.asisee.streetpieces.screens.settings.SettingsScreen
-import com.asisee.streetpieces.screens.sign_up.SignUpScreen
-import com.asisee.streetpieces.screens.splash.SplashScreen
-import com.asisee.streetpieces.screens.userpieces.UserPiecesScreen
+import com.asisee.streetpieces.screens.NavGraphs
 import com.asisee.streetpieces.theme.PiecesTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import com.ramcosta.composedestinations.DestinationsNavHost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.asisee.streetpieces.R.string as AppText
 
 val CURRENT_YEAR = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).year
 
@@ -56,9 +49,8 @@ fun PiecesApp() {
             RequestNotificationPermissionDialog()
         }
 
-        Surface(color = MaterialTheme.colors.background) {
+        Surface {
             val appState = rememberAppState()
-
             Scaffold(
                 snackbarHost = {
                     SnackbarHost(
@@ -70,15 +62,13 @@ fun PiecesApp() {
                 },
                 scaffoldState = appState.scaffoldState,
                 bottomBar = {
-                    if (appState.shouldShowBottomBar())
+                    if (!appState.shouldHideBottomBar())
                         BottomBar(navController = appState.navController)
                 }) { innerPaddingModifier ->
-                    NavHost(
+                    DestinationsNavHost(
                         navController = appState.navController,
-                        startDestination = SPLASH_SCREEN,
-                        modifier = Modifier.padding(innerPaddingModifier)) {
-                            piecesGraph(appState)
-                        }
+                        navGraph = NavGraphs.root,
+                        modifier = Modifier.padding(innerPaddingModifier))
                 }
         }
     }
@@ -122,68 +112,68 @@ fun resources(): Resources {
     return LocalContext.current.resources
 }
 
-@ExperimentalMaterialApi
-fun NavGraphBuilder.piecesGraph(appState: PiecesAppState) {
-    composable(SPLASH_SCREEN) {
-        SplashScreen(
-            openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) },
-            open = { route -> appState.navigate(route) })
-    }
-
-    composable(SETTINGS_SCREEN) {
-        SettingsScreen(
-            restartApp = { route -> appState.clearAndNavigate(route) },
-            openScreen = { route -> appState.navigate(route) })
-    }
-
-    composable(LOGIN_SCREEN) {
-        LoginScreen(openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) })
-    }
-
-    composable(SIGN_UP_SCREEN) {
-        SignUpScreen(openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) })
-    }
-
-    composable(TAKE_PHOTO_SCREEN) {
-        RequestCameraPermissionDialog()
-        CameraScreen(openScreen = { route -> appState.navigate(route) })
-    }
-
-    composable(
-        route = "$CREATE_PIECE_SCREEN$PHOTO_URI_ARG",
-        arguments = listOf(navArgument(PHOTO_URI) { nullable = false })) {
-            RequestLocationPermissionDialog()
-            CreatePieceScreen(
-                openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) })
-        }
-
-    composable(
-        route = "$PROFILE_SCREEN$USER_ID_ARG",
-        arguments = listOf(navArgument(USER_ID) { nullable = false })) {
-            ProfileScreen(
-                openScreen = { route -> appState.navigate(route) },
-                openAndPopUpCurrent = { route -> appState.navigateAndPopUpCurrent(route) })
-        }
-
-    composable(SEARCH_FEED_SCREEN) {
-        SearchFeedScreen(openScreen = { route -> appState.navigate(route) })
-    }
-
-    composable(
-        route = "$PIECE_SCREEN$PIECE_ID_USER_ID_ARG",
-        arguments =
-            listOf(
-                navArgument(PIECE_ID) { nullable = false },
-                navArgument(USER_ID) { nullable = false })) {
-            PieceScreen(popUp = appState::popUp, open = appState::navigate)
-        }
-
-    composable(
-        route = "$USER_PIECES_SCREEN$PIECE_ID_USER_ID_ARG",
-        arguments =
-            listOf(
-                navArgument(PIECE_ID) { nullable = false },
-                navArgument(USER_ID) { nullable = false })) {
-            UserPiecesScreen(popUp = appState::popUp, open = appState::navigate)
-        }
-}
+// @ExperimentalMaterialApi
+// fun NavGraphBuilder.piecesGraph(appState: PiecesAppState) {
+//    composable(SPLASH_SCREEN_ROUTE) {
+//        SplashScreen(
+//            openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) },
+//            open = { route -> appState.navigate(route) })
+//    }
+//
+//    composable(SETTINGS_SCREEN) {
+//        SettingsScreen(
+//            restartApp = { route -> appState.clearAndNavigate(route) },
+//            openScreen = { route -> appState.navigate(route) })
+//    }
+//
+//    composable(LOGIN_SCREEN) {
+//        LoginScreen(openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) })
+//    }
+//
+//    composable(SIGN_UP_SCREEN) {
+//        SignUpScreen(openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) })
+//    }
+//
+//    composable(TAKE_PHOTO_SCREEN) {
+//        RequestCameraPermissionDialog()
+//        CameraScreen(openScreen = { route -> appState.navigate(route) })
+//    }
+//
+//    composable(
+//        route = "$CREATE_PIECE_SCREEN$PHOTO_URI_ARG",
+//        arguments = listOf(navArgument(PHOTO_URI) { nullable = false })) {
+//            RequestLocationPermissionDialog()
+//            CreatePieceScreen(
+//                openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) })
+//        }
+//
+//    composable(
+//        route = "$PROFILE_SCREEN$USER_ID_ARG",
+//        arguments = listOf(navArgument(USER_ID) { nullable = false })) {
+//            ProfileScreen(
+//                openScreen = { route -> appState.navigate(route) },
+//                openAndPopUpCurrent = { route -> appState.navigateAndPopUpCurrent(route) })
+//        }
+//
+//    composable(SEARCH_FEED_SCREEN) {
+//        SearchFeedScreen(openScreen = { route -> appState.navigate(route) })
+//    }
+//
+//    composable(
+//        route = "$PIECE_SCREEN$PIECE_ID_USER_ID_ARG",
+//        arguments =
+//            listOf(
+//                navArgument(PIECE_ID) { nullable = false },
+//                navArgument(USER_ID) { nullable = false })) {
+//            PieceScreen(popUp = appState::popUp, open = appState::navigate)
+//        }
+//
+//    composable(
+//        route = "$USER_PIECES_SCREEN$PIECE_ID_USER_ID_ARG",
+//        arguments =
+//            listOf(
+//                navArgument(PIECE_ID) { nullable = false },
+//                navArgument(USER_ID) { nullable = false })) {
+//            UserPiecesScreen(popUp = appState::popUp, open = appState::navigate)
+//        }
+// }

@@ -10,7 +10,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class LocationServiceImpl @Inject constructor(@ApplicationContext private val context: Context) : LocationService{
+class LocationServiceImpl @Inject constructor(@ApplicationContext private val context: Context) :
+    LocationService {
     @SuppressLint("MissingPermission")
-    override suspend fun getCurrentLocation(): Location = LocationServices.getFusedLocationProviderClient(context).getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
+    override suspend fun getCurrentLocation(): Location =
+        LocationServices.getFusedLocationProviderClient(context)
+            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+            .await()
 }
