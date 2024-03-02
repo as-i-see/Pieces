@@ -1,11 +1,9 @@
 package com.asisee.streetpieces.screens.create_piece
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
+import com.asisee.streetpieces.common.ext.toPieceLocation
 import com.asisee.streetpieces.model.Piece
-import com.asisee.streetpieces.model.PieceLocation
 import com.asisee.streetpieces.model.service.AccountService
 import com.asisee.streetpieces.model.service.LocationService
 import com.asisee.streetpieces.model.service.LogService
@@ -14,12 +12,15 @@ import com.asisee.streetpieces.model.service.PieceStorageService
 import com.asisee.streetpieces.screens.LogViewModel
 import com.asisee.streetpieces.screens.navArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.syntax.simple.intent
+import org.orbitmvi.orbit.syntax.simple.postSideEffect
+import org.orbitmvi.orbit.syntax.simple.reduce
+import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
+
 
 @HiltViewModel
 class CreatePieceViewModel
@@ -31,45 +32,46 @@ constructor(
     private val photoStorageService: PhotoStorageService,
     private val accountService: AccountService,
     private val locationService: LocationService
-) : LogViewModel(logService) {
+) : ContainerHost<CreatePieceState, CreatePieceSideEffect>, LogViewModel(logService) {
     private val navArgs: CreatePieceScreenNavArgs = savedStateHandle.navArgs()
-    val piece = mutableStateOf(Piece(photoUri = navArgs.photoUri))
-    var locationFetchTick = 0
-    private var locationFetchJob: Job =
-        viewModelScope.launch(Dispatchers.Default) {
-            while (true) {
-                delay(1000)
-                locationFetchTick++
+    override val container: Container<CreatePieceState, CreatePieceSideEffect> =
+        container(CreatePieceState(Piece(photoUri = navArgs.photoUri)), savedStateHandle)
+
+    fun onTitleChange(newTitle: String) = intent {
+        reduce {
+            state.copy(piece = state.piece.copy(title = newTitle))
+        }
+    }
+
+    fun onDoneClick() = intent {
+        if (state.piece.title.isBlank()) {
+            postSideEffect(CreatePieceSideEffect.MissingTitleError)
+        } else if (state.usingLocation && state.piece.location == null) {
+            reduce {
+                state.copy(usingLocation = false)
+            }
+            postSideEffect(CreatePieceSideEffect.LocationFetchError)
+        } else launchCatching {
+            reduce {
+                state.copy(showLoader = true)
+            }
+            val resultPiece = state.piece.copy(
+                dateTimeInEpochSeconds = Clock.System.now().epochSeconds,
+                photoUri = photoStorageService.uploadPiecePhoto(state.piece.photoUri.toUri())
+            )
+            storageService.save(resultPiece)
+            postSideEffect(CreatePieceSideEffect.NavigateFurther)
+        }
+    }
+    fun fetchLocation() = intent {
+        reduce {
+            state.copy(usingLocation = true)
+        }
+        launchCatching(false) {
+            val currentLocation = locationService.getCurrentLocation().toPieceLocation()
+            reduce {
+                state.copy(piece = state.piece.copy(location = currentLocation))
             }
         }
-
-    fun onTitleChange(newValue: String) {
-        piece.value = piece.value.copy(title = newValue)
-    }
-
-    fun onDoneClick(toMainScreen: () -> Unit) {
-        launchCatching {
-            val pieceDto =
-                piece.value.copy(
-                    dateTimeInEpochSeconds = Clock.System.now().epochSeconds,
-                    photoUri = photoStorageService.uploadPiecePhoto(piece.value.photoUri.toUri()))
-            storageService.save(pieceDto)
-            toMainScreen()
-        }
-    }
-
-    fun updateLocation() {
-        launchCatching(false) {
-            piece.value =
-                piece.value.copy(
-                    location =
-                        locationService.getCurrentLocation().run {
-                            PieceLocation(latitude, longitude)
-                        })
-        }
-    }
-
-    fun onLocationFetched() {
-        if (locationFetchJob.isActive) locationFetchJob.cancel()
     }
 }
