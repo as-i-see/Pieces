@@ -45,6 +45,9 @@
     <string name="description">Description</string>
     <string name="url">URL</string>
     <string name="date">Date</string>
+    <string name="set_location">Set location</string>
+    <string name="title_error_message">Please set a title</string>
+    <string name="location_error_message">Location fetch error, try again</string>
     <string name="time">Time</string>
     <string name="flag">Flag</string>
     <string name="priority">Priority</string>

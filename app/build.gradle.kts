@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    id("kotlin-parcelize")
     id("com.google.devtools.ksp")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
@@ -119,4 +120,11 @@ dependencies {
     implementation("io.github.raamcosta.compose-destinations:animations-core:1.9.62")
     ksp("io.github.raamcosta.compose-destinations:ksp:1.9.62")
 
+    // Orbit-MVI
+    implementation("org.orbit-mvi:orbit-viewmodel:6.1.0")
+    implementation("org.orbit-mvi:orbit-compose:6.1.0")
+
+    // Prev gen
+    implementation("io.github.vram-voskanyan.kmp:PreviewGenerator:1.0.2") // take latest from Maven central
+    ksp("io.github.vram-voskanyan.kmp:PreviewGenerator:1.0.2")
 }
