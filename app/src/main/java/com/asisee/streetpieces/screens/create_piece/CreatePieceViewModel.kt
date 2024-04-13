@@ -11,6 +11,7 @@ import com.asisee.streetpieces.model.service.PhotoStorageService
 import com.asisee.streetpieces.model.service.PieceStorageService
 import com.asisee.streetpieces.screens.LogViewModel
 import com.asisee.streetpieces.screens.navArgs
+import com.github.michaelbull.result.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.datetime.Clock
 import org.orbitmvi.orbit.Container
@@ -35,7 +36,7 @@ constructor(
 ) : ContainerHost<CreatePieceState, CreatePieceSideEffect>, LogViewModel(logService) {
     private val navArgs: CreatePieceScreenNavArgs = savedStateHandle.navArgs()
     override val container: Container<CreatePieceState, CreatePieceSideEffect> =
-        container(CreatePieceState(Piece(photoUri = navArgs.photoUri)), savedStateHandle)
+        container(CreatePieceState(Piece(photoUri = navArgs.photoUri)))
 
     fun onTitleChange(newTitle: String) = intent {
         reduce {
@@ -46,14 +47,11 @@ constructor(
     fun onDoneClick() = intent {
         if (state.piece.title.isBlank()) {
             postSideEffect(CreatePieceSideEffect.MissingTitleError)
-        } else if (state.usingLocation && state.piece.location == null) {
-            reduce {
-                state.copy(usingLocation = false)
-            }
-            postSideEffect(CreatePieceSideEffect.LocationFetchError)
+        } else if (state.locationIsLoading) {
+            postSideEffect(CreatePieceSideEffect.LocationStillLoadingError)
         } else launchCatching {
             reduce {
-                state.copy(showLoader = true)
+                state.copy(pieceIsUploading = true)
             }
             val resultPiece = state.piece.copy(
                 dateTimeInEpochSeconds = Clock.System.now().epochSeconds,
@@ -65,13 +63,20 @@ constructor(
     }
     fun fetchLocation() = intent {
         reduce {
-            state.copy(usingLocation = true)
+            state.copy(
+                locationIsLoading = true
+            )
         }
-        launchCatching(false) {
-            val currentLocation = locationService.getCurrentLocation().toPieceLocation()
-            reduce {
-                state.copy(piece = state.piece.copy(location = currentLocation))
-            }
+        val location = locationService.getCurrentLocation().map { it.toPieceLocation() }
+        reduce {
+            state.copy(
+                locationIsLoading = false,
+                locationResult = location
+            )
         }
+    }
+
+    fun requestLocationPermission() = intent {
+        postSideEffect(CreatePieceSideEffect.RequestLocationPermission)
     }
 }

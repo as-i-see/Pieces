@@ -46,7 +46,9 @@
     <string name="url">URL</string>
     <string name="date">Date</string>
     <string name="set_location">Set location</string>
+    <string name="grant_location_permission">Grant location permission</string>
     <string name="title_error_message">Please set a title</string>
+    <string name="error_try_again">Error! Try again</string>
     <string name="location_error_message">Location fetch error, try again</string>
     <string name="time">Time</string>
     <string name="flag">Flag</string>
@@ -100,6 +102,7 @@
     <string name="configuration_tap_to_focus">use tap to focus</string>
     <string name="delete">delete</string>
     <string name="qr_code">QR code</string>
+    <string name="unknown_error">Unknown error</string>
 
     <!-- Location -->
     <string name="location_permission_title">Location permission</string>

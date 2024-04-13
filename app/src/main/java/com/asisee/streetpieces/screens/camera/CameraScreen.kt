@@ -1,8 +1,11 @@
 package com.asisee.streetpieces.screens.camera
 
+import android.Manifest
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,11 +25,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asisee.streetpieces.common.ext.noClickable
+import com.asisee.streetpieces.common.snackbar.SnackbarManager
+import com.asisee.streetpieces.common.snackbar.SnackbarMessage
 import com.asisee.streetpieces.screens.camera.components.ActionBox
 import com.asisee.streetpieces.screens.camera.components.SettingsBox
 import com.asisee.streetpieces.screens.camera.mapper.toFlash
 import com.asisee.streetpieces.screens.camera.mapper.toFlashMode
 import com.asisee.streetpieces.screens.camera.model.Flash
+import com.asisee.streetpieces.screens.destinations.CreatePieceScreenDestination
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.skydoves.cloudy.Cloudy
@@ -37,27 +45,65 @@ import com.ujizin.camposer.state.rememberCamSelector
 import com.ujizin.camposer.state.rememberCameraState
 import com.ujizin.camposer.state.rememberFlashMode
 import com.ujizin.camposer.state.rememberTorch
+import org.orbitmvi.orbit.compose.collectSideEffect
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import com.asisee.streetpieces.common.composable.SpacerXL
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Destination
 @Composable
 fun CameraScreen(
     navigator: DestinationsNavigator,
     viewModel: CameraViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cameraState = rememberCameraState()
-    CameraSection(
-        cameraState = cameraState,
-        onTakePicture = { viewModel.takePicture(navigator::navigate, cameraState) },
-        onGalleryClick = { viewModel.onGalleryClick() },
+    val cameraPermissionState = rememberMultiplePermissionsState(
+        buildList {
+            add(Manifest.permission.CAMERA)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                add(Manifest.permission.READ_MEDIA_IMAGES)
+                add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.READ_MEDIA_IMAGES)
+            } else {
+                add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
     )
-
-    val context = LocalContext.current
-    LaunchedEffect(uiState.error) {
-        if (uiState.error != null) {
-            Toast.makeText(context, uiState.error!!.message, Toast.LENGTH_SHORT).show()
+    viewModel.collectSideEffect { sideEffect ->
+        when(sideEffect) {
+            is CameraSideEffect.NavigateWithPhotoResult -> {
+                navigator.navigate(CreatePieceScreenDestination(sideEffect.photoUri.toString()))
+            }
+            is CameraSideEffect.Error -> {
+                SnackbarManager.showMessage(SnackbarMessage.StringSnackbar(sideEffect.message))
+            }
         }
     }
+    if (cameraPermissionState.allPermissionsGranted) {
+        CameraSection(
+            cameraState = cameraState,
+            onTakePicture = { viewModel.takePicture(navigator::navigate, cameraState) },
+            onGalleryClick = { viewModel.onGalleryClick() },
+        )
+    } else Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Text(text = "Please grant all permissions to make the camera work properly")
+        SpacerXL()
+        Button(
+            onClick = {
+                cameraPermissionState.launchMultiplePermissionRequest()
+            }
+        ) {
+            Text("Grant")
+        }
+    }
+
+
 }
 
 @Composable
@@ -127,8 +173,9 @@ fun CameraInnerContent(
     ) {
         SettingsBox(
             modifier =
-                Modifier.fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 8.dp, start = 24.dp, end = 24.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 8.dp, start = 24.dp, end = 24.dp),
             zoomRatio = zoomRatio,
             zoomHasChanged = zoomHasChanged,
             flashMode = flashMode,
@@ -137,7 +184,10 @@ fun CameraInnerContent(
             onZoomFinish = onZoomFinish,
         )
         ActionBox(
-            modifier = Modifier.fillMaxWidth().noClickable().padding(bottom = 32.dp, top = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .noClickable()
+                .padding(bottom = 32.dp, top = 16.dp),
             onGalleryClick = onGalleryClick,
             onTakePicture = onTakePicture,
             onSwitchCamera = onSwitchCamera,

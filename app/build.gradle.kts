@@ -127,4 +127,6 @@ dependencies {
     // Prev gen
     implementation("io.github.vram-voskanyan.kmp:PreviewGenerator:1.0.2") // take latest from Maven central
     ksp("io.github.vram-voskanyan.kmp:PreviewGenerator:1.0.2")
+
+    implementation("com.michael-bull.kotlin-result:kotlin-result:2.0.0")
 }

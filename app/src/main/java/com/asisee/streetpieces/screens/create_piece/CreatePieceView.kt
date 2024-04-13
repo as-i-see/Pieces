@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
@@ -32,7 +33,12 @@ import com.asisee.streetpieces.common.composable.ActionToolbar
 import com.asisee.streetpieces.common.composable.BasicField
 import com.asisee.streetpieces.common.composable.SpacerM
 import com.asisee.streetpieces.common.composable.SpacerS
+import com.asisee.streetpieces.common.exceptions.LocationResultException
+import com.asisee.streetpieces.common.ext.circularProgressIndicator
 import com.asisee.streetpieces.common.ext.row
+import com.asisee.streetpieces.model.PieceLocation
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapBoth
 import com.asisee.streetpieces.R.string as AppText
 
 @Composable
@@ -41,8 +47,10 @@ fun CreatePieceView(
     onDoneClick: () -> Unit,
     onTitleChange: (String) -> Unit,
     onFetchLocationClick: () -> Unit,
+    onRequestLocationPermissionClick: () -> Unit,
+    locationPermissionGranted: Boolean,
 ) {
-    if (state.showLoader) {
+    if (state.pieceIsUploading) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
@@ -50,7 +58,9 @@ fun CreatePieceView(
         )
         {
             CircularProgressIndicator(
-                modifier = Modifier.width(200.dp).height(200.dp),
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(200.dp),
             )
         }
     } else {
@@ -96,27 +106,65 @@ fun CreatePieceView(
             SpacerS()
             Divider()
             SpacerM()
-            Row(
-                modifier = Modifier.row(),
-                horizontalArrangement = Arrangement.Center,
+            LocationHandler(
+                isLoading = state.locationIsLoading,
+                locationResult = state.locationResult,
+                onFetchLocationClick = onFetchLocationClick,
+                onRequestLocationPermissionClick = onRequestLocationPermissionClick,
+                permissionGranted = locationPermissionGranted,
+            )
+        }
+    }
+}
+
+@Composable
+fun LocationHandler(
+    isLoading: Boolean,
+    locationResult: Result<PieceLocation, LocationResultException>?,
+    onFetchLocationClick: () -> Unit,
+    onRequestLocationPermissionClick: () -> Unit,
+    permissionGranted : Boolean,
+) {
+    Row(
+        modifier = Modifier.row(),
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        if (locationResult != null) { // location is being used
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.circularProgressIndicator())
+            } else locationResult.mapBoth(
+                { location ->
+                    Text(text = location.toString())
+                },
+                { error ->
+                    when(error) {
+                        LocationResultException.PermissionRequestFlow -> {
+                            if (permissionGranted)
+                                onFetchLocationClick()
+                            else
+                                Button(
+                                    onClick = { onRequestLocationPermissionClick() },
+                                ) {
+                                    Text(text = stringResource(id = AppText.grant_location_permission))
+                                }
+                        }
+                        LocationResultException.LocationFetchException -> {
+                            Button(
+                                onClick = { onFetchLocationClick() },
+                            ) {
+                                Text(text = stringResource(id = AppText.error_try_again))
+                            }
+                        }
+                    }
+                }
+            )
+        } else { // location is not used
+            Button(
+                onClick = { onFetchLocationClick() },
             ) {
-                if (state.usingLocation) {
-                    if (state.piece.location == null) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.height(64.dp).width(64.dp),
-                        )
-                    } else {
-                        Text(text = state.piece.location.toString())
-                    }
-                }
-                else {
-                    ElevatedButton(
-                        onClick = { onFetchLocationClick() },
-                        elevation = ButtonDefaults.elevatedButtonElevation()) {
-                        Text(text = stringResource(id = AppText.set_location))
-                    }
-                }
+                Text(text = stringResource(id = AppText.set_location))
             }
         }
     }
 }
+

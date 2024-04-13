@@ -1,12 +1,13 @@
 package com.asisee.streetpieces.screens.create_piece
 
-import android.os.Parcelable
+import com.asisee.streetpieces.common.exceptions.LocationResultException
 import com.asisee.streetpieces.model.Piece
-import kotlinx.parcelize.Parcelize
+import com.asisee.streetpieces.model.PieceLocation
+import com.github.michaelbull.result.Result
 
-@Parcelize
 data class CreatePieceState(
     val piece: Piece = Piece(),
-    val usingLocation: Boolean = false,
-    val showLoader: Boolean = false,
-) : Parcelable
+    val locationResult: Result<PieceLocation, LocationResultException>? = null,
+    val locationIsLoading : Boolean = false,
+    val pieceIsUploading: Boolean = false,
+)
