@@ -31,12 +31,12 @@ import com.asisee.streetpieces.model.Piece
 import com.asisee.streetpieces.model.UserData
 
 @Composable
-fun PieceView(piece: Piece, userData: UserData, toProfile: (String) -> Unit) {
+fun Piece(piece: Piece, userData: UserData, toProfile: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier =
                 Modifier.fillMaxWidth().padding(start = 16.dp).clickable {
-                    toProfile(userData.userId)
+                    toProfile()
                 },
             verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(

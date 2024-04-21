@@ -1,3 +1,6 @@
 package com.asisee.streetpieces.screens.userpieces
 
-data class UserPiecesScreenNavArgs(val clickedPieceId: String, val userId: String)
+data class UserPiecesScreenNavArgs(
+    val userId: String,
+    val clickedPieceId: String,
+)

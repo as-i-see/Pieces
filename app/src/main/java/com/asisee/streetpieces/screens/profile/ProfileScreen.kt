@@ -213,7 +213,7 @@ fun ProfileScreen(navigator: DestinationsNavigator, viewModel: ProfileViewModel 
                                     .aspectRatio(1f)
                                     .clickable {
                                         navigator.navigate(
-                                            UserPiecesScreenDestination(piece.id, userData.userId))
+                                            UserPiecesScreenDestination(userData.userId, piece.id))
                                     },
                         )
                     }

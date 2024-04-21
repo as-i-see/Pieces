@@ -31,7 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.asisee.streetpieces.R
-import com.asisee.streetpieces.common.composable.PieceView
+import com.asisee.streetpieces.common.composable.Piece
 import com.asisee.streetpieces.common.composable.SpacerML
 import com.asisee.streetpieces.common.composable.SpacerS
 import com.asisee.streetpieces.common.ext.epochSecondsToPieceDate
@@ -67,7 +67,7 @@ fun PieceScreen(navigator: DestinationsNavigator, viewModel: PieceViewModel = hi
                 modifier = Modifier.padding(start = 28.dp))
         }
         SpacerML()
-        PieceView(
+        Piece(
             piece = piece,
             userData = userData,
             toProfile = { navigator.navigate(ProfileScreenDestination(userData.userId)) })

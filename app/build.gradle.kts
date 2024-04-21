@@ -8,6 +8,7 @@ plugins {
     id("com.google.firebase.firebase-perf")
     id("dagger.hilt.android.plugin")
     id("com.ncorti.ktfmt.gradle") version "0.10.0"
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -129,4 +130,6 @@ dependencies {
     ksp("io.github.vram-voskanyan.kmp:PreviewGenerator:1.0.2")
 
     implementation("com.michael-bull.kotlin-result:kotlin-result:2.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
 }

@@ -192,7 +192,7 @@ fun OwnProfileScreen(
                                         .clickable {
                                             navigator.navigate(
                                                 UserPiecesScreenDestination(
-                                                    piece.id, userData.userId))
+                                                    userData.userId, piece.id))
                                         },
                             )
                         }

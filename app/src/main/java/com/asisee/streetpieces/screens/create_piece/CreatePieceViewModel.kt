@@ -33,7 +33,7 @@ constructor(
     private val photoStorageService: PhotoStorageService,
     private val accountService: AccountService,
     private val locationService: LocationService
-) : ContainerHost<CreatePieceState, CreatePieceSideEffect>, LogViewModel(logService) {
+) : LogViewModel(logService), ContainerHost<CreatePieceState, CreatePieceSideEffect> {
     private val navArgs: CreatePieceScreenNavArgs = savedStateHandle.navArgs()
     override val container: Container<CreatePieceState, CreatePieceSideEffect> =
         container(CreatePieceState(Piece(photoUri = navArgs.photoUri)))
