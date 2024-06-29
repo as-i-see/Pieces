@@ -1,16 +1,13 @@
 package com.asisee.streetpieces.screens.settings
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,57 +15,105 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getNavigatorScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.asisee.streetpieces.common.composable.BasicToolbar
 import com.asisee.streetpieces.common.composable.DangerousCardEditor
 import com.asisee.streetpieces.common.composable.DialogCancelButton
 import com.asisee.streetpieces.common.composable.DialogConfirmButton
 import com.asisee.streetpieces.common.composable.RegularCardEditor
+import com.asisee.streetpieces.common.composable.SpacerM
 import com.asisee.streetpieces.common.ext.card
-import com.asisee.streetpieces.common.ext.spacerM
-import com.asisee.streetpieces.screens.destinations.LoginScreenDestination
-import com.asisee.streetpieces.screens.destinations.SignUpScreenDestination
-import com.asisee.streetpieces.screens.destinations.SplashScreenDestination
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.asisee.streetpieces.R.drawable as AppIcon
+import com.asisee.streetpieces.common.snackbar.SnackbarManager
+import com.asisee.streetpieces.common.snackbar.SnackbarMessage.Companion.toSnackbarMessage
+import com.asisee.streetpieces.screens.sign_in.SignInScreen
+import com.asisee.streetpieces.screens.sign_up.SignUpScreen
+import compose.icons.EvaIcons
+import compose.icons.evaicons.Outline
+import compose.icons.evaicons.outline.LogIn
+import compose.icons.evaicons.outline.LogOut
+import compose.icons.evaicons.outline.PersonAdd
+import compose.icons.evaicons.outline.Trash2
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import com.asisee.streetpieces.R.string as AppText
 
-@ExperimentalMaterialApi
-@Destination
-@Composable
-fun SettingsScreen(
-    navigator: DestinationsNavigator,
-    viewModel: SettingsViewModel = hiltViewModel()
-) {
-    val uiState = viewModel.uiState.collectAsState(initial = SettingsUiState(false))
-
-    Column(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight().verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally) {
-            BasicToolbar(AppText.settings)
-
-            Spacer(modifier = Modifier.spacerM())
-            if (uiState.value.isAnonymousAccount) {
-                RegularCardEditor(AppText.sign_in, AppIcon.ic_sign_in, "", Modifier.card()) {
-                    navigator.navigate(LoginScreenDestination)
+class SettingsScreen : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val screenModel = navigator.getNavigatorScreenModel<SettingsScreenModel>()
+        val state by screenModel.collectAsState()
+        val signOutErrorString = stringResource(AppText.sign_out_error)
+        val deleteAccountErrorString = stringResource(AppText.delete_account_error)
+        screenModel.collectSideEffect { sideEffect ->
+            when(sideEffect) {
+                SettingsScreenSideEffect.RestartApp -> {
+                    navigator.popUntilRoot()
                 }
-
-                RegularCardEditor(
-                    AppText.create_account, AppIcon.ic_create_account, "", Modifier.card()) {
-                        navigator.navigate(SignUpScreenDestination)
-                    }
-            } else {
-                SignOutCard {
-                    viewModel.onSignOutClick { navigator.clearBackStack(SplashScreenDestination) }
+                SettingsScreenSideEffect.SignOutError -> {
+                    SnackbarManager.showMessage(signOutErrorString.toSnackbarMessage())
                 }
-                DeleteMyAccountCard {
-                    viewModel.onDeleteMyAccountClick {
-                        navigator.clearBackStack(SplashScreenDestination)
-                    }
+                SettingsScreenSideEffect.DeleteAccountError -> {
+                    SnackbarManager.showMessage(deleteAccountErrorString.toSnackbarMessage())
+                }
+                SettingsScreenSideEffect.OpenSignInScreen -> {
+                    navigator.push(SignInScreen())
+                }
+                SettingsScreenSideEffect.OpenSignUpScreen -> {
+                    navigator.push(SignUpScreen())
                 }
             }
         }
+        View(
+            state = state,
+            openSignInScreen = screenModel::openSignInScreen,
+            openSignUpScreen = screenModel::openSignUpScreen,
+            signOut = screenModel::signOut,
+            deleteAccount = screenModel::deleteAccount,
+        )
+    }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    fun View(
+        state: SettingsScreenState,
+        openSignInScreen: () -> Unit,
+        openSignUpScreen: () -> Unit,
+        signOut: () -> Unit,
+        deleteAccount: () -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            BasicToolbar(AppText.settings)
+            SpacerM()
+            if (state.isAnonymousAccount) {
+                RegularCardEditor(
+                    title = AppText.sign_in,
+                    icon = EvaIcons.Outline.LogIn,
+                    content = "",
+                    modifier = Modifier.card(),
+                    onEditClick = openSignInScreen
+                )
+                RegularCardEditor(
+                    title = AppText.create_account,
+                    icon = EvaIcons.Outline.PersonAdd,
+                    content = "",
+                    modifier = Modifier.card(),
+                    onEditClick = openSignUpScreen
+                )
+            } else {
+                SignOutCard(signOut)
+                DeleteMyAccountCard(deleteAccount)
+            }
+        }
+    }
 }
 
 @ExperimentalMaterialApi
@@ -76,10 +121,14 @@ fun SettingsScreen(
 private fun SignOutCard(signOut: () -> Unit) {
     var showWarningDialog by remember { mutableStateOf(false) }
 
-    RegularCardEditor(AppText.sign_out, AppIcon.ic_exit, "", Modifier.card()) {
+    RegularCardEditor(
+        title = AppText.sign_out,
+        icon = EvaIcons.Outline.LogOut,
+        content = "",
+        modifier = Modifier.card()
+    ) {
         showWarningDialog = true
     }
-
     if (showWarningDialog) {
         AlertDialog(
             title = { Text(stringResource(AppText.sign_out_title)) },
@@ -101,9 +150,13 @@ private fun DeleteMyAccountCard(deleteMyAccount: () -> Unit) {
     var showWarningDialog by remember { mutableStateOf(false) }
 
     DangerousCardEditor(
-        AppText.delete_my_account, AppIcon.ic_delete_my_account, "", Modifier.card()) {
-            showWarningDialog = true
-        }
+        title = AppText.delete_my_account,
+        icon = EvaIcons.Outline.Trash2,
+        content = "",
+        modifier = Modifier.card()
+    ) {
+        showWarningDialog = true
+    }
 
     if (showWarningDialog) {
         AlertDialog(

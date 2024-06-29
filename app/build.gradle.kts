@@ -6,7 +6,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("com.google.firebase.firebase-perf")
-    id("dagger.hilt.android.plugin")
+//    id("dagger.hilt.android.plugin")
     id("com.ncorti.ktfmt.gradle") version "0.10.0"
     id("org.jetbrains.kotlin.plugin.serialization")
 }
@@ -81,9 +81,9 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 //    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
-    implementation("com.google.dagger:hilt-android:2.47")
+//    implementation("com.google.dagger:hilt-android:2.47")
     implementation("androidx.test:runner:1.5.2")
-    ksp("com.google.dagger:hilt-compiler:2.47")
+//    ksp("com.google.dagger:hilt-compiler:2.47")
 
     //Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.2.2"))
@@ -122,8 +122,9 @@ dependencies {
     ksp("io.github.raamcosta.compose-destinations:ksp:1.9.62")
 
     // Orbit-MVI
-    implementation("org.orbit-mvi:orbit-viewmodel:6.1.0")
-    implementation("org.orbit-mvi:orbit-compose:6.1.0")
+    val orbitVersion = "8.0.0"
+    implementation("org.orbit-mvi:orbit-core:$orbitVersion")
+    implementation("org.orbit-mvi:orbit-compose:$orbitVersion")
 
     // Prev gen
     implementation("io.github.vram-voskanyan.kmp:PreviewGenerator:1.0.2") // take latest from Maven central
@@ -132,4 +133,22 @@ dependencies {
     implementation("com.michael-bull.kotlin-result:kotlin-result:2.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
+    // Koin
+    val koinVersion = "3.5.6"
+    implementation(platform("io.insert-koin:koin-bom:$koinVersion"))
+    implementation("io.insert-koin:koin-core")
+    implementation("io.insert-koin:koin-androidx-compose")
+    val koinAnnotationVersion = "1.3.1"
+    implementation("io.insert-koin:koin-annotations:$koinAnnotationVersion")
+    ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationVersion")
+
+    // voyager
+    val voyagerVersion = "1.0.0"
+    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-koin:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+    
+    // icon pack Eva Icons
+    implementation("br.com.devsrsouza.compose.icons:eva-icons:1.1.0")
 }

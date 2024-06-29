@@ -5,11 +5,12 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
+import org.koin.core.annotation.Single
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
-
-class FileDataSource @Inject constructor() {
+@Single
+class FileDataSource {
 
     private val externalDir = "${Environment.DIRECTORY_DCIM}${File.separator}$RELATIVE_PATH"
 

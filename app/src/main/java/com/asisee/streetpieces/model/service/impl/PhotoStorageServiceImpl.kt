@@ -1,20 +1,20 @@
 package com.asisee.streetpieces.model.service.impl
 
-import android.net.Uri
+import androidx.core.net.toUri
 import com.asisee.streetpieces.model.service.PhotoStorageService
 import com.google.firebase.storage.FirebaseStorage
+import org.koin.core.annotation.Single
 import java.util.UUID
-import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-
-class PhotoStorageServiceImpl @Inject constructor(storage: FirebaseStorage) : PhotoStorageService {
+@Single
+class PhotoStorageServiceImpl(storage: FirebaseStorage) : PhotoStorageService {
     private val storageRef = storage.reference
 
-    private suspend fun uploadImageToFolder(uri: Uri, folder: String) =
+    private suspend fun uploadImageToFolder(uri: String, folder: String) =
         suspendCoroutine { continuation ->
             val pieceRef = storageRef.child("$folder/${UUID.randomUUID()}")
-            val uploadTask = pieceRef.putFile(uri)
+            val uploadTask = pieceRef.putFile(uri.toUri())
             uploadTask
                 .continueWithTask { task ->
                     if (!task.isSuccessful) {
@@ -26,12 +26,12 @@ class PhotoStorageServiceImpl @Inject constructor(storage: FirebaseStorage) : Ph
                 .addOnSuccessListener { continuation.resume(it.toString()) }
         }
 
-    override suspend fun uploadPiecePhoto(uri: Uri) = uploadImageToFolder(uri, PIECES_FOLDER)
+    override suspend fun uploadPiecePhoto(uri: String) = uploadImageToFolder(uri, POSTS_FOLDER)
 
-    override suspend fun uploadAvatar(uri: Uri) = uploadImageToFolder(uri, AVATARS_FOLDER)
+    override suspend fun uploadAvatar(uri: String) = uploadImageToFolder(uri, AVATARS_FOLDER)
 
     companion object {
-        private const val PIECES_FOLDER = "pieces"
+        private const val POSTS_FOLDER = "posts"
         private const val AVATARS_FOLDER = "avatars"
     }
 }

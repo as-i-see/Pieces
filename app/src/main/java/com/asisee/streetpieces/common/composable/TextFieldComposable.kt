@@ -6,9 +6,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,12 +13,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import com.asisee.streetpieces.R.drawable as AppIcon
+import com.asisee.streetpieces.common.ext.fieldModifier
+import compose.icons.EvaIcons
+import compose.icons.evaicons.Outline
+import compose.icons.evaicons.outline.Email
+import compose.icons.evaicons.outline.Eye
+import compose.icons.evaicons.outline.EyeOff2
+import compose.icons.evaicons.outline.Lock
 import com.asisee.streetpieces.R.string as AppText
 
 @Composable
@@ -41,7 +43,7 @@ fun BasicField(
 }
 
 @Composable
-fun BasicFieldLeadingIcon(
+fun BasicLeadingIconField(
     @StringRes text: Int,
     iconImageVector: ImageVector,
     value: String,
@@ -67,9 +69,15 @@ fun EmailField(value: String, onNewValue: (String) -> Unit, modifier: Modifier =
         singleLine = true,
         modifier = modifier,
         value = value,
-        onValueChange = { onNewValue(it) },
+        onValueChange = onNewValue,
         placeholder = { Text(stringResource(AppText.email)) },
-        leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = "Email") })
+        leadingIcon = {
+            Icon(
+                imageVector = EvaIcons.Outline.Email,
+                contentDescription = stringResource(AppText.email)
+            )
+        }
+    )
 }
 
 @Composable
@@ -78,11 +86,7 @@ fun PasswordField(value: String, onNewValue: (String) -> Unit, modifier: Modifie
 }
 
 @Composable
-fun RepeatPasswordField(
-    value: String,
-    onNewValue: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun RepeatPasswordField(value: String, onNewValue: (String) -> Unit, modifier: Modifier) {
     PasswordField(value, AppText.repeat_password, onNewValue, modifier)
 }
 
@@ -96,23 +100,35 @@ private fun PasswordField(
     var isVisible by remember { mutableStateOf(false) }
 
     val icon =
-        if (isVisible) painterResource(AppIcon.ic_visibility_on)
-        else painterResource(AppIcon.ic_visibility_off)
+        if (isVisible) EvaIcons.Outline.Eye
+        else EvaIcons.Outline.EyeOff2
 
     val visualTransformation =
-        if (isVisible) VisualTransformation.None else PasswordVisualTransformation()
+        if (isVisible) VisualTransformation.None
+        else PasswordVisualTransformation()
 
     OutlinedTextField(
         modifier = modifier,
         value = value,
         onValueChange = { onNewValue(it) },
         placeholder = { Text(text = stringResource(placeholder)) },
-        leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = "Lock") },
+        leadingIcon = {
+            Icon(
+                imageVector = EvaIcons.Outline.Lock,
+                contentDescription = stringResource(AppText.lock)
+            )
+        },
         trailingIcon = {
-            IconButton(onClick = { isVisible = !isVisible }) {
-                Icon(painter = icon, contentDescription = "Visibility")
+            IconButton(
+                onClick = { isVisible = !isVisible }
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = stringResource(AppText.password_visibility)
+                )
             }
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        visualTransformation = visualTransformation)
+        visualTransformation = visualTransformation
+    )
 }

@@ -15,10 +15,10 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
+import org.koin.core.annotation.Single
 import javax.inject.Inject
-
-class LocationServiceImpl @Inject constructor(@ApplicationContext private val context: Context) :
-    LocationService {
+@Single
+class LocationServiceImpl(private val context: Context) : LocationService {
     override suspend fun getCurrentLocation(): Result<Location, LocationResultException> =
         if (ActivityCompat.checkSelfPermission(
                 context,

@@ -10,5 +10,5 @@ data class UserData(
     val name: String = "",
     val username: String = "",
     val bio: String = "",
-    val photoUri: String = ""
+    val profilePictureUrl: String = ""
 )

@@ -10,6 +10,7 @@ sealed class SnackbarMessage {
     class ResourceSnackbar(@StringRes val message: Int) : SnackbarMessage()
 
     companion object {
+        fun String.toSnackbarMessage() = StringSnackbar(this)
         fun SnackbarMessage.toMessage(resources: Resources): String {
             return when (this) {
                 is StringSnackbar -> this.message

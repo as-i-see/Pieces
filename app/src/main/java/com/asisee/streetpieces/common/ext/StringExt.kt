@@ -32,10 +32,6 @@ fun String.isValidPassword(): Boolean {
         Pattern.compile(PASS_PATTERN).matcher(this).matches()
 }
 
-fun String.passwordMatches(repeated: String): Boolean {
-    return this == repeated
-}
-
 fun String.parameterFromParameterValue(): String {
     return this.substring(1, this.length - 1)
 }

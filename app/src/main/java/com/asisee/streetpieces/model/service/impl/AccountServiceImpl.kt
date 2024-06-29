@@ -9,15 +9,19 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import org.koin.core.annotation.Single
 import javax.inject.Inject
-
-class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : AccountService {
+@Single
+class AccountServiceImpl(private val auth: FirebaseAuth) : AccountService {
 
     override val currentUserId: String
         get() = auth.currentUser?.uid.orEmpty()
 
     override val hasUser: Boolean
         get() = auth.currentUser != null
+    override val userIsAnonymous: Boolean
+        get() = auth.currentUser?.isAnonymous ?: false
+
 
     override val currentUser: User?
         get() = auth.currentUser?.let { User(it.uid, it.isAnonymous) }
