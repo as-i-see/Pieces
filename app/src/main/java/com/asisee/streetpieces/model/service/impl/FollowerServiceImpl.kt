@@ -8,7 +8,7 @@ import com.asisee.streetpieces.model.service.trace
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.dataObjects
+import com.google.firebase.firestore.dataObjects
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -18,19 +18,17 @@ import org.koin.core.annotation.Single
 class FollowerServiceImpl(
     private val firestore: FirebaseFirestore, private val auth: AccountService
 ) : FollowerService {
-    override fun userFolloweesInId(userId: String): Flow<List<String>> =
+    override fun userSubscriptions(userId: String): Flow<List<Subscription>> =
         firestore
             .collection(SUBSCRIPTIONS_COLLECTION)
             .whereEqualTo(USER_ID_FIELD, userId)
-            .dataObjects<Subscription>()
-            .map { it.map { it.subUserId } }
+            .dataObjects()
 
-    override fun userFollowersInId(userId: String): Flow<List<String>> =
+    override fun userFollowers(userId: String): Flow<List<Subscription>> =
         firestore
             .collection(SUBSCRIPTIONS_COLLECTION)
             .whereEqualTo(SUBSCRIPTION_USER_ID_FIELD, userId)
-            .dataObjects<Subscription>()
-            .map { it.map { it.userId } }
+            .dataObjects()
 
     override suspend fun follow(userId: String, otherUserId: String) =
         trace(SUBSCRIBE_TRACE) {
@@ -56,7 +54,7 @@ class FollowerServiceImpl(
             .await()
             .count
 
-    override suspend fun numberOfFollowees(userId: String) =
+    override suspend fun numberOfSubscriptions(userId: String) =
         firestore
             .collection(SUBSCRIPTIONS_COLLECTION)
             .whereEqualTo(USER_ID_FIELD, userId)

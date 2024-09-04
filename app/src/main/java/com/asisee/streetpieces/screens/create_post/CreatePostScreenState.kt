@@ -1,16 +1,17 @@
-package com.asisee.streetpieces.screens.create_piece
+package com.asisee.streetpieces.screens.create_post
 
 import com.asisee.streetpieces.common.exceptions.LocationResultException
 import com.asisee.streetpieces.model.PostData
 import com.asisee.streetpieces.model.PieceLocation
+import com.asisee.streetpieces.screens.sign_in.SignInScreenState.SignIn
 
-sealed interface CreatePieceScreenState {
-    data object Loading: CreatePieceScreenState
+sealed interface CreatePostScreenState {
+    data object Loading: CreatePostScreenState
 
-    data class CreatePiece(
+    data class CreatePost(
         val postData: PostData = PostData(),
         val pieceLocation: PieceLocationState = PieceLocationState.NotUsed
-    ) : CreatePieceScreenState
+    ) : CreatePostScreenState
 
     sealed interface PieceLocationState {
         data object NotUsed: PieceLocationState
@@ -20,5 +21,7 @@ sealed interface CreatePieceScreenState {
 
         data class Used(val pieceLocation: PieceLocation) : PieceLocationState
     }
+
+    fun fill(title: String) = (this as? CreatePost)?.copy(postData = postData.copy(title = title)) ?: this
 }
 

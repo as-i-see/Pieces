@@ -28,7 +28,6 @@ class SplashScreenModel(
             }
         }
 
-
     private fun logInOrAsk() = intent {
         if (accountService.hasUser && !accountService.userIsAnonymous) {
             postSideEffect(SplashScreenSideEffect.NavigateToFeedScreen)
@@ -39,20 +38,20 @@ class SplashScreenModel(
         }
     }
 
-    fun continueAnonymously() = intent {
-        if (accountService.hasUser)
-            postSideEffect(SplashScreenSideEffect.NavigateToFeedScreen)
-        else {
-            try {
-                withContext(Dispatchers.IO) {
-                    accountService.createAnonymousAccount()
-                }
-                postSideEffect(SplashScreenSideEffect.NavigateToFeedScreen)
-            } catch (ex: FirebaseAuthException) {
-                postSideEffect(SplashScreenSideEffect.DisplayError)
-            }
-        }
-    }
+//    fun continueAnonymously() = intent {
+//        if (accountService.hasUser)
+//            postSideEffect(SplashScreenSideEffect.NavigateToFeedScreen)
+//        else {
+//            try {
+//                withContext(Dispatchers.IO) {
+//                    accountService.createAnonymousAccount()
+//                }
+//                postSideEffect(SplashScreenSideEffect.NavigateToFeedScreen)
+//            } catch (ex: FirebaseAuthException) {
+//                postSideEffect(SplashScreenSideEffect.DisplayError)
+//            }
+//        }
+//    }
 
     fun navigateToSignInScreen() = intent {
         postSideEffect(SplashScreenSideEffect.NavigateToSignInScreen)

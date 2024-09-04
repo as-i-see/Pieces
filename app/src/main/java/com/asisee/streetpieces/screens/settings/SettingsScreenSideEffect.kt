@@ -1,6 +1,8 @@
 package com.asisee.streetpieces.screens.settings
 
 sealed interface SettingsScreenSideEffect {
+    data object PopBack: SettingsScreenSideEffect
+
     data object RestartApp: SettingsScreenSideEffect
 
     data object SignOutError: SettingsScreenSideEffect

@@ -11,6 +11,8 @@ import com.asisee.streetpieces.model.datasource.FileDataSource
 import com.ujizin.camposer.state.CameraState
 import com.ujizin.camposer.state.ImageCaptureResult
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Factory
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.container
@@ -25,13 +27,15 @@ class CameraScreenModel (
     override val container = screenModelScope.container<CameraScreenState, CameraScreenSideEffect>(CameraScreenState)
 
     fun takePicture(cameraState: CameraState) = intent {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            cameraState.takePicture(fileDataSource.imageContentValues) {
-                onImageResult(it)
-            }
-        } else {
-            cameraState.takePicture(fileDataSource.getFile("jpg")) {
-                onImageResult(it)
+        withContext(Dispatchers.Main) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                cameraState.takePicture(fileDataSource.imageContentValues) {
+                    onImageResult(it)
+                }
+            } else {
+                cameraState.takePicture(fileDataSource.getFile("jpg")) {
+                    onImageResult(it)
+                }
             }
         }
     }

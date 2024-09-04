@@ -51,7 +51,7 @@
     <string name="set_location">Set location</string>
     <string name="grant_location_permission">Grant location permission</string>
     <string name="title_error_message">Please set a title</string>
-    <string name="error_try_again">Error! Try again</string>
+    <string name="error_try_again">Error! Make sure location is on and try again</string>
     <string name="location_error_message">Location fetch error, try again</string>
     <string name="time">Time</string>
     <string name="flag">Flag</string>
@@ -65,6 +65,7 @@
     <string name="upload">Upload</string>
     <!-- ProfileScreen -->
     <string name="profile">Profile</string>
+    <string name="plus">Plus</string>
     <!-- SearchFeedScreen -->
     <string name="search">Search</string>
     <string name="search_icon">Search icon</string>
@@ -118,4 +119,6 @@
     <string name="location_permission_rationale">The location is required for uploading photos. Please turn on location access in settings and navigate to your device settings to enable location access for Pieces App.</string>
     <string name="error_indicator">Error Indicator</string>
     <string name="error">Error</string>
+
+    <string name="empty_feed">Here you will see posts from users you subscribe to</string>
 </resources>

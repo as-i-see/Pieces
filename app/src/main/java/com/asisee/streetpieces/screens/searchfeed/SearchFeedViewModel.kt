@@ -3,6 +3,7 @@ package com.asisee.streetpieces.screens.searchfeed
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.asisee.streetpieces.model.PostData
+import com.asisee.streetpieces.model.UserData
 import com.asisee.streetpieces.model.service.PostService
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory

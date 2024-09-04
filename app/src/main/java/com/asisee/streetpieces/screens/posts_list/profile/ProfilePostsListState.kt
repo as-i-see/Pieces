@@ -1,9 +1,9 @@
-package com.asisee.streetpieces.screens.pieces_list.profile
+package com.asisee.streetpieces.screens.posts_list.profile
 
 import com.asisee.streetpieces.model.PostData
 import com.asisee.streetpieces.model.UserData
 
-data class ProfilePiecesListState (
+data class ProfilePostsListState (
     val userData: UserData,
     val pieces: List<PostData>,
 )

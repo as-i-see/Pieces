@@ -1,6 +1,9 @@
 package com.asisee.streetpieces.screens.sign_in
 
 import android.content.Context
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -10,6 +13,10 @@ import com.asisee.streetpieces.common.snackbar.SnackbarManager
 import com.asisee.streetpieces.model.service.AccountService
 import com.asisee.streetpieces.screens.own_profile.OwnProfileScreenState
 import com.asisee.streetpieces.screens.sign_up.SignUpScreenSideEffect
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Factory
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.annotation.OrbitExperimental
@@ -29,35 +36,32 @@ class SignInScreenModel(
     override val container = screenModelScope
         .container<SignInScreenState, SignInScreenSideEffect>(SignInScreenState.SignIn())
 
-    fun onEmailChange(newValue: String) = intent {
-        runOn(SignInScreenState.SignIn::class) {
-            reduce {
-                state.copy(email = newValue)
-            }
-        }
+    var email by mutableStateOf("")
+        private set
+    var password by mutableStateOf("")
+        private set
+
+    fun onEmailChange(newValue: String) {
+        email = newValue
     }
 
-    fun onPasswordChange(newValue: String) = intent {
-        runOn(SignInScreenState.SignIn::class) {
-            reduce {
-                state.copy(password = newValue)
-            }
-        }
+    fun onPasswordChange(newValue: String) {
+        password = newValue
     }
 
     fun onSignInClick() = intent {
         (state as? SignInScreenState.SignIn)?.let { state ->
-            if (!state.email.isValidEmail()) {
+            if (!email.isValidEmail()) {
                 postMessageSideEffect(AppText.email_error)
             }
-            else if (state.password.isBlank()) {
+            else if (password.isBlank()) {
                 postMessageSideEffect(AppText.empty_password_error)
             } else {
                 reduce {
                     SignInScreenState.Loading
                 }
                 try {
-                    accountService.authenticate(state.email, state.password)
+                    accountService.authenticate(email, password)
                     postSideEffect(SignInScreenSideEffect.NavigateToFeedScreen)
                 } catch (e: Exception) {
                     postMessageSideEffect(AppText.authentication_error)
@@ -72,14 +76,14 @@ class SignInScreenModel(
 
     fun onForgotPasswordClick() = intent {
         (state as? SignInScreenState.SignIn)?.let { state ->
-            if (!state.email.isValidEmail()) {
+            if (!email.isValidEmail()) {
                 postMessageSideEffect(AppText.email_error)
             } else {
                 reduce {
                     SignInScreenState.Loading
                 }
                 try {
-                    accountService.sendRecoveryEmail(state.email)
+                    accountService.sendRecoveryEmail(email)
                     postSideEffect(SignInScreenSideEffect.DisplayMessage(
                         ContextCompat.getString(context, AppText.recovery_email_sent))
                     )

@@ -3,7 +3,6 @@ package com.asisee.streetpieces
 import android.content.res.Resources
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Stable
-import androidx.navigation.NavHostController
 import com.asisee.streetpieces.common.snackbar.SnackbarManager
 import com.asisee.streetpieces.common.snackbar.SnackbarMessage.Companion.toMessage
 import kotlinx.coroutines.CoroutineScope
@@ -13,7 +12,6 @@ import kotlinx.coroutines.launch
 @Stable
 class PiecesAppState(
     val snackbarHostState: SnackbarHostState,
-    val navController: NavHostController,
     private val snackbarManager: SnackbarManager,
     private val resources: Resources,
     coroutineScope: CoroutineScope
@@ -25,14 +23,6 @@ class PiecesAppState(
                 snackbarHostState.showSnackbar(text)
             }
         }
-    }
-
-    fun popUp() {
-        navController.popBackStack()
-    }
-
-    fun navigate(route: String) {
-        navController.navigate(route) { launchSingleTop = true }
     }
 //
 //    @Composable

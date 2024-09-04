@@ -46,8 +46,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.asisee.streetpieces.common.composable.CenteredColumn
 import com.asisee.streetpieces.common.composable.SpacerXL
 import com.asisee.streetpieces.common.snackbar.SnackbarMessage.Companion.toSnackbarMessage
-import com.asisee.streetpieces.screens.create_piece.CreatePieceScreen
-import org.orbitmvi.orbit.compose.collectAsState
+import com.asisee.streetpieces.screens.create_post.CreatePostScreen
 import com.asisee.streetpieces.R.string as AppText
 class CameraScreen : Screen {
     @Composable
@@ -58,7 +57,7 @@ class CameraScreen : Screen {
         screenModel.collectSideEffect { sideEffect ->
             when (sideEffect) {
                 is CameraScreenSideEffect.PhotoResult -> {
-                    navigator.push(CreatePieceScreen(sideEffect.photoUri))
+                    navigator.push(CreatePostScreen(sideEffect.photoUri))
                 }
                 is CameraScreenSideEffect.Error -> {
                     SnackbarManager.showMessage(sideEffect.message.toSnackbarMessage())

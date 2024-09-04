@@ -6,12 +6,9 @@ import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
@@ -29,14 +26,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.tab.CurrentTab
-import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
-import cafe.adriel.voyager.navigator.tab.Tab
-import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.asisee.streetpieces.common.composable.PermissionDialog
 import com.asisee.streetpieces.common.composable.RationaleDialog
+import com.asisee.streetpieces.common.composable.TabNavigationItem
 import com.asisee.streetpieces.common.snackbar.SnackbarManager
-import com.asisee.streetpieces.model.service.module.AppModule
 import com.asisee.streetpieces.screens.feed.FeedTab
 import com.asisee.streetpieces.screens.own_profile.OwnProfileTab
 import com.asisee.streetpieces.screens.searchfeed.SearchFeedTab
@@ -50,11 +43,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.compose.KoinAndroidContext
-import org.koin.compose.KoinApplication
-import org.koin.ksp.generated.module
 import com.asisee.streetpieces.R.string as AppText
 
 val CURRENT_YEAR = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).year
@@ -131,7 +120,7 @@ fun rememberAppState(
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) =
     remember(snackbarHostState, navController, snackbarManager, resources, coroutineScope) {
-        PiecesAppState(snackbarHostState, navController, snackbarManager, resources, coroutineScope)
+        PiecesAppState(snackbarHostState, snackbarManager, resources, coroutineScope)
     }
 
 @Composable

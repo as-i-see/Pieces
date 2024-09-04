@@ -10,45 +10,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.asisee.streetpieces.model.Post
 import com.asisee.streetpieces.model.UserData
-import com.asisee.streetpieces.model.UserPieces
+import com.asisee.streetpieces.model.UserPost
+import com.asisee.streetpieces.model.UserPosts
 
 @Composable
-fun PiecesList(
-    toolbarTitle: String,
-    posts: List<Post>,
-    shownPieceIndex: Int,
-    popBack: () -> Unit,
+fun FeedPostsList(
+    posts: List<UserPost>,
     toUserProfile: (UserData) -> Unit,
 ) {
-    val lazyListState = rememberLazyListState()
-    LaunchedEffect(shownPieceIndex) {
-        lazyListState.scrollToItem(shownPieceIndex)
-    }
     Column(Modifier.fillMaxWidth()) {
-        NavBackActionToolbar(navigateBack = popBack, title = toolbarTitle) {}
-        SpacerML()
+        SpacerS()
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            state = lazyListState,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(posts) { piece ->
+            items(posts) { userPost ->
                 Post(
-                    postData = piece.data,
-                    userData = piece.author,
+                    postData = userPost.postData,
+                    userData = userPost.userData,
                     toProfile = toUserProfile
                 )
+                SpacerS()
             }
         }
-        SpacerM()
     }
 }
 
 @Composable
 fun ProfilePiecesList(
-    userPieces: UserPieces,
+    userPosts: UserPosts,
     shownPieceIndex: Int,
     popBack: () -> Unit,
     toUserProfile: (UserData) -> Unit,
@@ -58,17 +49,17 @@ fun ProfilePiecesList(
         lazyListState.scrollToItem(shownPieceIndex)
     }
     Column(Modifier.fillMaxWidth()) {
-        NavBackActionToolbar(navigateBack = popBack, title = userPieces.userData.username) {}
+        NavBackActionToolbar(navigateBack = popBack, title = userPosts.userData.username) {}
         SpacerML()
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             state = lazyListState,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(userPieces.piecesData) { piece ->
+            items(userPosts.piecesData) { piece ->
                 Post(
                     postData = piece,
-                    userData = userPieces.userData,
+                    userData = userPosts.userData,
                     toProfile = toUserProfile
                 )
             }

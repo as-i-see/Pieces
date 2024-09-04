@@ -1,13 +1,15 @@
 package com.asisee.streetpieces.model.service
 
-import com.asisee.streetpieces.model.Post
 import com.asisee.streetpieces.model.PostData
+import com.asisee.streetpieces.model.Subscription
 import kotlinx.coroutines.flow.Flow
 
 interface PostService {
     val getPostsByCurrentUser: Flow<List<PostData>>
 
     fun getPostsByUser(userId: String): Flow<List<PostData>>
+
+    fun getPostsByUserSubscriptions(subscriptions: List<String>) : Flow<List<PostData>>
 
     fun getPostFlow(pieceId: String): Flow<PostData>
 

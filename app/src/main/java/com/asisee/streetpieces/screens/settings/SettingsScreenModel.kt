@@ -56,6 +56,7 @@ class SettingsScreenModel (
         ) {
             accountService.signOut()
             postSideEffect(SettingsScreenSideEffect.RestartApp)
+
         }
     }
 
@@ -75,5 +76,9 @@ class SettingsScreenModel (
 
     fun openSignUpScreen() = intent {
         postSideEffect(SettingsScreenSideEffect.OpenSignUpScreen)
+    }
+
+    fun popBack() = intent {
+        postSideEffect(SettingsScreenSideEffect.PopBack)
     }
 }

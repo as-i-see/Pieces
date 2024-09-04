@@ -1,5 +1,8 @@
-package com.asisee.streetpieces.screens.create_piece
+package com.asisee.streetpieces.screens.create_post
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,42 +42,61 @@ import com.asisee.streetpieces.common.composable.SpacerM
 import com.asisee.streetpieces.common.composable.SpacerS
 import com.asisee.streetpieces.common.exceptions.LocationResultException
 import com.asisee.streetpieces.common.ext.row
+import com.asisee.streetpieces.screens.own_profile.OwnProfileScreen
+import com.asisee.streetpieces.screens.own_profile.OwnProfileTabScreen
 import compose.icons.EvaIcons
 import compose.icons.evaicons.Fill
 import compose.icons.evaicons.fill.Checkmark
+import org.koin.core.parameter.parametersOf
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import com.asisee.streetpieces.R.string as AppText
-class CreatePieceScreen(val photoUri: String) : Screen {
+class CreatePostScreen(private val pictureUri: String) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val screenModel = navigator.getNavigatorScreenModel<CreatePieceScreenModel>()
+        val screenModel = navigator.getNavigatorScreenModel<CreatePostScreenModel>(parameters = { parametersOf(pictureUri) })
         val state by screenModel.collectAsState()
+        val locationPermissions = arrayOf (
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+        val locationPermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions(),
+            onResult = { permissions ->
+                val permissionsGranted = permissions.values.reduce { acc, isPermissionGranted ->
+                    acc && isPermissionGranted
+                }
+                if (permissionsGranted) {
+                    screenModel.fetchLocation()
+                }
+            })
         screenModel.collectSideEffect { sideEffect ->
             when(sideEffect) {
-                CreatePieceSideEffect.NavigateFurther -> {
+                CreatePostSideEffect.NavigateToProfile -> {
+                    navigator.popUntil {
+                        it is OwnProfileScreen || it is OwnProfileTabScreen
+                    }
+                }
+                CreatePostSideEffect.UploadError -> {
 
                 }
-                CreatePieceSideEffect.UploadError -> {
+                CreatePostSideEffect.MissingTitleError -> {
 
                 }
-                CreatePieceSideEffect.MissingTitleError -> {
+                CreatePostSideEffect.LocationStillLoadingError -> {
 
                 }
-                CreatePieceSideEffect.LocationStillLoadingError -> {
-
+                CreatePostSideEffect.RequestLocationPermission -> {
+                    locationPermissionLauncher.launch(locationPermissions)
                 }
-                CreatePieceSideEffect.RequestLocationPermission -> {
-
-                }
-                CreatePieceSideEffect.NavBack -> {
+                CreatePostSideEffect.NavBack -> {
 
                 }
             }
         }
         View(
-            state = state,
+            state = state.fill(screenModel.title),
             onNavBack = screenModel::navBack,
             onDoneClick = screenModel::onDoneClick,
             onTitleChange = screenModel::onTitleChange,
@@ -85,7 +107,7 @@ class CreatePieceScreen(val photoUri: String) : Screen {
 
     @Composable
     fun View(
-        state: CreatePieceScreenState,
+        state: CreatePostScreenState,
         onNavBack: () -> Unit,
         onDoneClick: () -> Unit,
         onTitleChange: (String) -> Unit,
@@ -93,10 +115,10 @@ class CreatePieceScreen(val photoUri: String) : Screen {
         onRequestLocationPermissionClick: () -> Unit,
     ) {
         when (state) {
-            is CreatePieceScreenState.Loading -> {
+            is CreatePostScreenState.Loading -> {
                 ProgressIndicator()
             }
-            is CreatePieceScreenState.CreatePiece -> {
+            is CreatePostScreenState.CreatePost -> {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -120,7 +142,8 @@ class CreatePieceScreen(val photoUri: String) : Screen {
                             R.string.title,
                             state.postData.title,
                             { newValue -> onTitleChange(newValue) },
-                            Modifier.fillMaxWidth(0.7f))
+                            Modifier.fillMaxWidth(0.7f)
+                        )
                         AsyncImage(
                             model =
                             ImageRequest.Builder(LocalContext.current)
@@ -151,7 +174,7 @@ class CreatePieceScreen(val photoUri: String) : Screen {
 
     @Composable
     fun LocationHandler(
-        locationState: CreatePieceScreenState.PieceLocationState,
+        locationState: CreatePostScreenState.PieceLocationState,
         onFetchLocationClick: () -> Unit,
         onRequestLocationPermissionClick: () -> Unit,
     ) {
@@ -160,20 +183,20 @@ class CreatePieceScreen(val photoUri: String) : Screen {
             horizontalArrangement = Arrangement.Center,
         ) {
             when (locationState) {
-                is CreatePieceScreenState.PieceLocationState.Loading -> {
+                is CreatePostScreenState.PieceLocationState.Loading -> {
                     ProgressIndicator()
                 }
-                is CreatePieceScreenState.PieceLocationState.Used -> {
+                is CreatePostScreenState.PieceLocationState.Used -> {
                     Text(text = locationState.pieceLocation.toString())
                 }
-                is CreatePieceScreenState.PieceLocationState.NotUsed -> {
+                is CreatePostScreenState.PieceLocationState.NotUsed -> {
                     Button(
                         onClick = { onFetchLocationClick() },
                     ) {
                         Text(text = stringResource(id = AppText.set_location))
                     }
                 }
-                is CreatePieceScreenState.PieceLocationState.Error -> {
+                is CreatePostScreenState.PieceLocationState.Error -> {
                     when (locationState.exception) {
                         LocationResultException.PermissionRequestFlow -> {
                             Button(

@@ -1,6 +1,9 @@
 package com.asisee.streetpieces.screens.sign_up
 
 import android.content.Context
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -35,52 +38,41 @@ class SignUpScreenModel(
     override val container = screenModelScope
         .container<SignUpScreenState, SignUpScreenSideEffect>(SignUpScreenState.SignUp())
 
-    fun onEmailChange(newValue: String) = intent {
-        runOn(SignUpScreenState.SignUp::class) {
-            reduce {
-                state.copy(email = newValue)
-            }
-        }
+    var username by mutableStateOf("")
+        private set
+    var name by mutableStateOf("")
+        private set
+    var bio by mutableStateOf("")
+        private set
+    var email by mutableStateOf("")
+        private set
+    var password by mutableStateOf("")
+        private set
+    var repeatPassword by mutableStateOf("")
+        private set
+
+    fun onEmailChange(newValue: String) {
+        email = newValue
     }
 
-    fun onPasswordChange(newValue: String) = intent {
-        runOn(SignUpScreenState.SignUp::class) {
-            reduce {
-                state.copy(password = newValue)
-            }
-        }
+    fun onPasswordChange(newValue: String) {
+        password = newValue
     }
 
-    fun onRepeatPasswordChange(newValue: String) = intent {
-        runOn(SignUpScreenState.SignUp::class) {
-            reduce {
-                state.copy(repeatPassword = newValue)
-            }
-        }
+    fun onRepeatPasswordChange(newValue: String) {
+        repeatPassword = newValue
     }
 
-    fun onUsernameChange(newValue: String) = intent {
-        runOn(SignUpScreenState.SignUp::class) {
-            reduce {
-                state.copy(username = newValue)
-            }
-        }
+    fun onUsernameChange(newValue: String) {
+        username = newValue
     }
 
-    fun onNameChange(newValue: String) = intent {
-        runOn(SignUpScreenState.SignUp::class) {
-            reduce {
-                state.copy(name = newValue)
-            }
-        }
+    fun onNameChange(newValue: String) {
+        name = newValue
     }
 
-    fun onBioChange(newValue: String) = intent {
-        runOn(SignUpScreenState.SignUp::class) {
-            reduce {
-                state.copy(bio = newValue)
-            }
-        }
+    fun onBioChange(newValue: String) {
+        bio = newValue
     }
 
     fun onProfilePictureChoose(pictureUri: String?) = intent {
@@ -95,13 +87,13 @@ class SignUpScreenModel(
 
     fun onSignUpClick() = intent {
         (state as? SignUpScreenState.SignUp)?.let { state ->
-            if (!state.email.isValidEmail()) {
+            if (!email.isValidEmail()) {
                 postMessageSideEffect(AppText.email_error)
-            } else if (!state.password.isValidPassword()) {
+            } else if (!password.isValidPassword()) {
                 postMessageSideEffect(AppText.password_error)
-            } else if (state.password != state.repeatPassword) {
+            } else if (password != repeatPassword) {
                 postMessageSideEffect(AppText.password_match_error)
-            } else if (!state.username.isValidUsername()) {
+            } else if (!username.isValidUsername()) {
                 postMessageSideEffect(AppText.username_error)
             } else {
                 reduce {
@@ -113,16 +105,16 @@ class SignUpScreenModel(
                             accountService.createAnonymousAccount()
                         }
                     }
-                    accountService.linkAccount(state.email, state.password)
+                    accountService.linkAccount(email, password)
                     val uploadedProfilePictureUrl =
                         if (state.profilePictureUrl.isNotEmpty())
                             photoStorageService.uploadAvatar(state.profilePictureUrl)
                         else ""
                     userDataService.save(
                         UserData(
-                            name = state.name,
-                            username = state.username,
-                            bio = state.bio,
+                            name = name,
+                            username = username,
+                            bio = bio,
                             profilePictureUrl = uploadedProfilePictureUrl
                         )
                     )

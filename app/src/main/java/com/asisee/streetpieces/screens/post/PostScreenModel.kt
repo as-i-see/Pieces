@@ -4,9 +4,8 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.asisee.streetpieces.model.PostData
 import com.asisee.streetpieces.model.UserData
-import com.asisee.streetpieces.model.service.PostService
+import com.asisee.streetpieces.model.service.AccountService
 import com.asisee.streetpieces.model.service.UserDataService
-import com.asisee.streetpieces.screens.pieces_list.PiecesListSideEffect
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.InjectedParam
@@ -19,30 +18,34 @@ import org.orbitmvi.orbit.syntax.simple.repeatOnSubscription
 
 @Factory
 class PostScreenModel(
+    @InjectedParam userData: UserData?,
     @InjectedParam postData: PostData,
     private val userDataService: UserDataService,
+    private val accountService: AccountService,
 ) : ScreenModel, ContainerHost<PostScreenState, PostScreenSideEffect> {
 
-    override val container = screenModelScope.container<PostScreenState, PostScreenSideEffect>(PostScreenState.Loading) {
-        repeatOnSubscription {
-            launch {
-                val authorData = userDataService.getUserData(postData.authorId)
-                reduce {
-                    PostScreenState.Post(
-                        author = authorData,
-                        post = postData
-                    )
+    override val container = if (userData == null)
+        screenModelScope.container<PostScreenState, PostScreenSideEffect>(PostScreenState.Loading) {
+            repeatOnSubscription {
+                launch {
+                    val authorData = userDataService.getUserData(postData.authorId)
+                    reduce {
+                        PostScreenState.Post(
+                            author = authorData,
+                            post = postData
+                        )
+                    }
                 }
-
             }
-        }
-    }
+        } else screenModelScope.container<PostScreenState, PostScreenSideEffect>(PostScreenState.Post(userData, postData))
 
     fun popBack() = intent {
         postSideEffect(PostScreenSideEffect.PopBack)
     }
 
     fun toUserProfile(userData: UserData) = intent {
-        postSideEffect(PostScreenSideEffect.NavigateToUserProfile(userData))
+        if (accountService.currentUserId == userData.userId)
+            postSideEffect(PostScreenSideEffect.NavigateToOwnProfile(userData))
+        else postSideEffect(PostScreenSideEffect.NavigateToUserProfile(userData))
     }
 }

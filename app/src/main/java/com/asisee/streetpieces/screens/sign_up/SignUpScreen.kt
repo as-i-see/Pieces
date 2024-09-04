@@ -65,7 +65,14 @@ class SignUpScreen : Screen {
             }
         }
         View(
-            state,
+            state.fill(
+                username = screenModel.username,
+                name = screenModel.name,
+                bio = screenModel.bio,
+                email = screenModel.email,
+                password = screenModel.password,
+                repeatPassword = screenModel.repeatPassword
+            ),
             screenModel::onEmailChange,
             screenModel::onPasswordChange,
             screenModel::onRepeatPasswordChange,

@@ -1,8 +1,12 @@
-package com.asisee.streetpieces.screens.create_piece
+package com.asisee.streetpieces.screens.create_post
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.asisee.streetpieces.common.ext.toPieceLocation
+import com.asisee.streetpieces.model.PostData
 import com.asisee.streetpieces.model.service.AccountService
 import com.asisee.streetpieces.model.service.LocationService
 import com.asisee.streetpieces.model.service.PhotoStorageService
@@ -13,6 +17,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import org.koin.core.annotation.Factory
+import org.koin.core.annotation.InjectedParam
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.annotation.OrbitExperimental
 import org.orbitmvi.orbit.container
@@ -23,37 +28,39 @@ import org.orbitmvi.orbit.syntax.simple.runOn
 
 @Factory
 @OptIn(OrbitExperimental::class)
-class CreatePieceScreenModel (
+class CreatePostScreenModel (
+    @InjectedParam pictureUri: String,
     private val storageService: PostService,
     private val photoStorageService: PhotoStorageService,
     private val accountService: AccountService,
     private val locationService: LocationService
-) : ScreenModel, ContainerHost<CreatePieceScreenState, CreatePieceSideEffect> {
-    override val container =
-        screenModelScope.container<CreatePieceScreenState, CreatePieceSideEffect>(CreatePieceScreenState.Loading)
+) : ScreenModel, ContainerHost<CreatePostScreenState, CreatePostSideEffect> {
 
-    fun onTitleChange(newTitle: String) = intent {
-        runOn(CreatePieceScreenState.CreatePiece::class) {
-            reduce {
-                state.copy(postData = state.postData.copy(title = newTitle))
-            }
-        }
+    override val container = screenModelScope.container<CreatePostScreenState, CreatePostSideEffect>(
+        CreatePostScreenState.CreatePost(postData = PostData(pictureUrl = pictureUri))
+    )
+
+    var title by mutableStateOf("")
+        private set
+
+    fun onTitleChange(newTitle: String) {
+        title = newTitle
     }
 
     fun onDoneClick() = intent {
-        (state as? CreatePieceScreenState.CreatePiece)?.let { state ->
-            if (state.postData.title.isBlank()) {
-                postSideEffect(CreatePieceSideEffect.MissingTitleError)
-            } else if (state.pieceLocation is CreatePieceScreenState.PieceLocationState.Loading)
-                postSideEffect(CreatePieceSideEffect.LocationStillLoadingError)
+        (state as? CreatePostScreenState.CreatePost)?.let { state ->
+            if (title.isBlank()) {
+                postSideEffect(CreatePostSideEffect.MissingTitleError)
+            } else if (state.pieceLocation is CreatePostScreenState.PieceLocationState.Loading)
+                postSideEffect(CreatePostSideEffect.LocationStillLoadingError)
             else {
                 reduce {
-                    CreatePieceScreenState.Loading
+                    CreatePostScreenState.Loading
                 }
                 screenModelScope.launch(
                     CoroutineExceptionHandler { _, _ ->
                         intent {
-                            postSideEffect(CreatePieceSideEffect.UploadError)
+                            postSideEffect(CreatePostSideEffect.UploadError)
                             reduce {
                                 state
                             }
@@ -62,10 +69,11 @@ class CreatePieceScreenModel (
                 ) {
                     val uploadedPhotoUri = photoStorageService.uploadPiecePhoto(state.postData.pictureUrl)
                     val pieceToUpload = state.postData.copy(
+                        title = title,
                         epochSecondsCreatedAt = Clock.System.now().epochSeconds,
                         pictureUrl = uploadedPhotoUri
                     ).let { pieceData ->
-                        if (state.pieceLocation is CreatePieceScreenState.PieceLocationState.Used) {
+                        if (state.pieceLocation is CreatePostScreenState.PieceLocationState.Used) {
                             pieceData.copy(
                                 location = state.pieceLocation.pieceLocation
                             )
@@ -74,19 +82,19 @@ class CreatePieceScreenModel (
                         }
                     }
                     storageService.save(pieceToUpload)
-                    postSideEffect(CreatePieceSideEffect.NavigateFurther)
+                    postSideEffect(CreatePostSideEffect.NavigateToProfile)
                 }
             }
         }
     }
     fun fetchLocation() = intent {
-        runOn(CreatePieceScreenState.CreatePiece::class) {
+        runOn(CreatePostScreenState.CreatePost::class) {
             reduce {
-                state.copy(pieceLocation = CreatePieceScreenState.PieceLocationState.Loading)
+                state.copy(pieceLocation = CreatePostScreenState.PieceLocationState.Loading)
             }
             val locationResultState = locationService.getCurrentLocation().map { it.toPieceLocation() }.mapBoth(
-                { pieceLocation -> CreatePieceScreenState.PieceLocationState.Used(pieceLocation)},
-                { error -> CreatePieceScreenState.PieceLocationState.Error(error)}
+                { pieceLocation -> CreatePostScreenState.PieceLocationState.Used(pieceLocation)},
+                { error -> CreatePostScreenState.PieceLocationState.Error(error)}
             )
             reduce {
                 state.copy(pieceLocation = locationResultState)
@@ -95,10 +103,10 @@ class CreatePieceScreenModel (
     }
 
     fun requestLocationPermission() = intent {
-        postSideEffect(CreatePieceSideEffect.RequestLocationPermission)
+        postSideEffect(CreatePostSideEffect.RequestLocationPermission)
     }
 
     fun navBack() = intent {
-        postSideEffect(CreatePieceSideEffect.NavBack)
+        postSideEffect(CreatePostSideEffect.NavBack)
     }
 }

@@ -47,7 +47,7 @@ import com.asisee.streetpieces.common.composable.SpacerM
 import com.asisee.streetpieces.common.composable.SpacerS
 import com.asisee.streetpieces.model.SubscriptionState
 import com.asisee.streetpieces.model.UserData
-import com.asisee.streetpieces.model.UserPieces
+import com.asisee.streetpieces.model.UserPosts
 import compose.icons.EvaIcons
 import compose.icons.evaicons.Fill
 import compose.icons.evaicons.fill.Person
@@ -88,7 +88,7 @@ data class UserProfileScreen(val userData: UserData) : Screen {
         navigateBack: () -> Unit,
         follow: () -> Unit,
         unfollow: () -> Unit,
-        navigateToPiece: (UserPieces, Int) -> Unit
+        navigateToPiece: (UserPosts, Int) -> Unit
     ) {
         when (state) {
             is UserProfileScreenState.Loading -> {
@@ -125,7 +125,7 @@ data class UserProfileScreen(val userData: UserData) : Screen {
                                 contentDescription = stringResource(R.string.uploaded_avatar),
                                 modifier = Modifier
                                     .padding(start = 16.dp)
-                                    .fillMaxWidth(0.3f)
+                                    .fillMaxWidth(0.25f)
                                     .aspectRatio(1f)
                                     .clip(CircleShape)
                             )
@@ -142,21 +142,33 @@ data class UserProfileScreen(val userData: UserData) : Screen {
                                     text = state.pieces.size.toString(),
                                     fontWeight = FontWeight.Black,
                                     fontSize = 18.sp)
-                                Text(text = "Posts")
+                                Text(
+                                    text = "Posts",
+                                    fontWeight = FontWeight.Light,
+                                    fontSize = 14.sp
+                                )
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = state.numberOfFollowers.toString(),
                                     fontWeight = FontWeight.Black,
                                     fontSize = 18.sp)
-                                Text(text = "Followers")
+                                Text(
+                                    text = "Followers",
+                                    fontWeight = FontWeight.Light,
+                                    fontSize = 14.sp
+                                )
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = state.numberOfFollowees.toString(),
                                     fontWeight = FontWeight.Black,
                                     fontSize = 18.sp)
-                                Text(text = "Following")
+                                Text(
+                                    text = "Following",
+                                    fontWeight = FontWeight.Light,
+                                    fontSize = 14.sp
+                                )
                             }
                         }
                     }
@@ -231,7 +243,7 @@ data class UserProfileScreen(val userData: UserData) : Screen {
                                     .fillMaxSize()
                                     .aspectRatio(1f)
                                     .clickable {
-                                        navigateToPiece(UserPieces(state.userData, state.pieces), index)
+                                        navigateToPiece(UserPosts(state.userData, state.pieces), index)
                                     },
                             )
                         }

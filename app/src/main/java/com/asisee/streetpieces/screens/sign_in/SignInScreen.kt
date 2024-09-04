@@ -2,6 +2,7 @@ package com.asisee.streetpieces.screens.sign_in
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getNavigatorScreenModel
@@ -22,6 +23,8 @@ import com.asisee.streetpieces.common.ext.textButton
 import com.asisee.streetpieces.common.snackbar.SnackbarManager
 import com.asisee.streetpieces.common.snackbar.SnackbarMessage
 import com.asisee.streetpieces.screens.main.MainScreen
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import com.asisee.streetpieces.R.string as AppText
@@ -40,11 +43,10 @@ class SignInScreen : Screen {
                 is SignInScreenSideEffect.DisplayMessage -> {
                     SnackbarManager.showMessage(SnackbarMessage.StringSnackbar(sideEffect.message))
                 }
-
             }
         }
         View(
-            state,
+            state.fill(screenModel.email, screenModel.password),
             screenModel::onEmailChange,
             screenModel::onPasswordChange,
             screenModel::onSignInClick,

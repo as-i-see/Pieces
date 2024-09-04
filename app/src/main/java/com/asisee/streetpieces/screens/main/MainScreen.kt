@@ -7,6 +7,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -23,21 +25,13 @@ class MainScreen : Screen {
     override fun Content() {
         TabNavigator(tab = FeedTab) {
             Scaffold(
-//                snackbarHost = {
-//                    SnackbarHost(
-//                        hostState = appState.snackbarHostState,
-//                        modifier = Modifier.padding(8.dp),
-//                        snackbar = { snackbarData ->
-//                            Snackbar(snackbarData)
-//                        }
-//                    )
-//                },
                 bottomBar = {
                     BottomNavigation {
                         TabNavigationItem(FeedTab)
                         TabNavigationItem(SearchFeedTab)
                         TabNavigationItem(OwnProfileTab)
                     }
+
                 }
             ) { innerPaddingModifier ->
                 Box(

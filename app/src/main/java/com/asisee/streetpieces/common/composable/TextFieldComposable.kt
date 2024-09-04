@@ -1,11 +1,14 @@
 package com.asisee.streetpieces.common.composable
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,19 +68,22 @@ fun BasicLeadingIconField(
 
 @Composable
 fun EmailField(value: String, onNewValue: (String) -> Unit, modifier: Modifier = Modifier) {
-    OutlinedTextField(
-        singleLine = true,
-        modifier = modifier,
-        value = value,
-        onValueChange = onNewValue,
-        placeholder = { Text(stringResource(AppText.email)) },
-        leadingIcon = {
-            Icon(
-                imageVector = EvaIcons.Outline.Email,
-                contentDescription = stringResource(AppText.email)
-            )
-        }
-    )
+    Row(modifier = Modifier.height(IntrinsicSize.Max)) {
+        OutlinedTextField(
+            singleLine = true,
+            modifier = modifier,
+            value = value,
+            onValueChange = onNewValue,
+            placeholder = { Text(stringResource(AppText.email)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = EvaIcons.Outline.Email,
+                    contentDescription = stringResource(AppText.email)
+                )
+            }
+        )
+    }
+
 }
 
 @Composable

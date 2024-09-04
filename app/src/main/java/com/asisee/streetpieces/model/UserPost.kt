@@ -1,6 +1,6 @@
 package com.asisee.streetpieces.model
 
-data class UserPieces(
+data class UserPost(
     val userData: UserData,
-    val piecesData: List<PostData>
+    val postData: PostData,
 )

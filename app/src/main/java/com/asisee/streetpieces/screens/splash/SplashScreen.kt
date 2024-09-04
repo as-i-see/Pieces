@@ -21,8 +21,6 @@ import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import com.asisee.streetpieces.R.string as AppText
 
-private const val SPLASH_TIMEOUT = 1000L
-
 class SplashScreen : Screen {
     @Composable
     override fun Content() {
@@ -48,7 +46,6 @@ class SplashScreen : Screen {
         View(state,
             screenModel::navigateToSignInScreen,
             screenModel::navigateToSignUpScreen,
-            screenModel::continueAnonymously,
         )
     }
 
@@ -57,7 +54,6 @@ class SplashScreen : Screen {
         state: SplashScreenState,
         onSignInClick: () -> Unit,
         onSignUpClick: () -> Unit,
-        onContinueAnonymouslyClick: () -> Unit,
     ) {
         when(state) {
             is SplashScreenState.Loading -> {
@@ -67,7 +63,6 @@ class SplashScreen : Screen {
                 CenteredColumn {
                     BasicButton(AppText.sign_in, Modifier.basicButton(), onSignInClick)
                     BasicButton(AppText.create_account, Modifier.basicButton(), onSignUpClick)
-                    BasicTextButton(AppText.continue_anonymously, Modifier.basicButton(), onContinueAnonymouslyClick)
                 }
             }
         }

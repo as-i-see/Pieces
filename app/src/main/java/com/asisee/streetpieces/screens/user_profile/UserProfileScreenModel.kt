@@ -4,7 +4,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.asisee.streetpieces.model.SubscriptionState
 import com.asisee.streetpieces.model.UserData
-import com.asisee.streetpieces.model.UserPieces
+import com.asisee.streetpieces.model.UserPosts
 import com.asisee.streetpieces.model.service.AccountService
 import com.asisee.streetpieces.model.service.PostService
 import com.asisee.streetpieces.model.service.FollowerService
@@ -41,7 +41,7 @@ class UserProfileScreenModel(
             )
         }
         val numberOfFollowers = followerService.numberOfFollowers(userData.userId)
-        val numberOfFollowees = followerService.numberOfFollowees(userData.userId)
+        val numberOfFollowees = followerService.numberOfSubscriptions(userData.userId)
         runOn(UserProfileScreenState.UserProfile::class) {
             reduce {
                 state.copy(
@@ -67,8 +67,8 @@ class UserProfileScreenModel(
         postSideEffect(UserProfileScreenSideEffect.NavigateBack)
     }
 
-    fun navigateToPiece(userPieces: UserPieces, index: Int) = intent {
-        postSideEffect(UserProfileScreenSideEffect.NavigateToPiece(userPieces, index))
+    fun navigateToPiece(userPosts: UserPosts, index: Int) = intent {
+        postSideEffect(UserProfileScreenSideEffect.NavigateToPiece(userPosts, index))
     }
 
     fun follow() = intent {
